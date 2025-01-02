@@ -1,0 +1,70 @@
+
+#postAndCommentsBody {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 90%;
+    min-width: 600px;
+    margin: 20px auto;
+    background-color: #c3c7ca;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+
+}
+
+.postbody {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.55);
+    width: 75%;
+    min-width: 500px;
+}
+
+
+
+.postTitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.postContent {
+    padding: 5px;
+    margin: 5px;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #4b5563;
+}
+
+.commentButt {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 5px 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: #2c5ec9;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.commentButt:hover {
+    transform: scale(1.1);
+    transition: 0.4s ease;
+    background-color: #1c3c81;
+}
+
+.fullcommentContainor {
+    width: 90%;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: max-height 0.8s ease;
+    max-height: 0;
+}

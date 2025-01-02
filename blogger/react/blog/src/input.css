@@ -1,0 +1,27 @@
+.inputBox {
+    display: flex;
+    margin-top: 10px;
+    gap: 10px;
+}
+
+.inputBar {
+    flex: 1;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+}
+
+.submit {
+    padding: 10px 20px;
+    font-size: 1rem;
+    background-color: #1c9b4a;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.submit:hover {
+    background-color: #0e8339;
+}

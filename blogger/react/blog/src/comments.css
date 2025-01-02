@@ -1,0 +1,31 @@
+.commentContainor {
+    max-height: 400px;
+    max-width: 95%;
+    margin: auto;
+    padding: 10px;
+    background-color: #f5f4f4;
+    border-radius: 8px;
+    margin-top: 10px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.commentBody {
+    border: 1px solid rgb(177, 175, 175);
+    width: 90%;
+    margin: 10px 10px;
+    padding: 10px;
+    background-color: #f1f5f9;
+    border-radius: 5px;
+}
+
+.commenterName {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #1e293b;
+}
+
+.commentText {
+    color: #4b5563;
+    margin: 5px 0;
+}

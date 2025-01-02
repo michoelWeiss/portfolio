@@ -1,0 +1,124 @@
+#bloggerBody {
+    background-color: #c3c7ca;
+    padding: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 90%;
+    min-height: 100vh;
+    margin: 20px auto;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.maincontainer {
+    position: relative;
+    background-color: #a6a3a3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 600px;
+    height: 175px;
+    margin: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+    padding: 10px;
+    perspective: 1000px;
+}
+
+.border {
+    width: 95%;
+    height: 90%;
+    background-color: #c3c7ca;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    box-sizing: border-box;
+}
+
+.thecard {
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 1.2s ease;
+    position: relative;
+    will-change: transform;
+    perspective: 1000px;
+}
+
+.thecard:hover {
+    transform: rotateY(180deg);
+}
+
+.front,
+.back {
+    position: absolute;
+    backface-visibility: hidden;
+    background-color: #91da90bd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    transform-style: preserve-3d;
+}
+
+.front {
+    background-color: #e4f4ff;
+}
+
+.back {
+    background-color: #cbe2fa;
+    transform: rotateY(180deg);
+    align-items: center;
+}
+
+.name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #1e293b;
+}
+
+.work {
+    font-size: 1.1rem;
+    font-weight: 200;
+    color: #0c395c;
+    margin-bottom: 15px;
+}
+
+.bio {
+    font-size: 1.1rem;
+    font-weight: 200;
+    color: #0c395c;
+    margin-bottom: 15px;
+}
+
+.webTextContainer {
+    margin: auto;
+    text-align: center;
+    background-color: #d1d1d1ad;
+    border-radius: 10px;
+    padding: 5px;
+    max-width: 50%;
+    cursor: pointer;
+}
+
+.webText {
+    font-size: 1.1rem;
+    color: #3e3e3e;
+}
+
+.webText:hover {
+    text-decoration: underline;
+}
+
+.websiteLink {
+    color: #2b5eec;
+    text-decoration: none;
+    font-weight: bold;
+}

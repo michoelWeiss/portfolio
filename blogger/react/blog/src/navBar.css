@@ -1,0 +1,34 @@
+.headerContainer {
+    display: flex;
+    height: 10em;
+    width: 100%;
+    background-color: #1e293b;
+    color: #fff;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.header {
+    font-size: 2.3em;
+    font-style: italic;
+    text-decoration: underline;
+    margin: auto
+}
+
+.navLink {
+    position: absolute;
+    top: 15px;
+    left: 25px;
+    margin: 0;
+    padding: 10px;
+    font-size: 1.2em;
+    cursor: pointer;
+    color: #ffcc00;
+    text-decoration: none;
+}
+
+.navLink:hover {
+    transition: 0.2s ease;
+    text-decoration: underline;
+}
