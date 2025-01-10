@@ -22,7 +22,7 @@ export default function CreateBloggers() {
         
             <div id='bloggerBody'>
                 <NavBar text='Blogger Hub' homeLink={false}/>
-                {bloggers.map(user => <MakeBlogger blogger={user} />)}
+                {bloggers.map((user, index) => <MakeBlogger key={index} blogger={user} />)}
             </div>
         </>);
 }

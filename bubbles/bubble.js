@@ -60,22 +60,22 @@ export class Bubble {
         (this.speedUp ? this.speedup() : this.slowdown());
         this.draw(ctx);
     }
-    slowdown(){
+    slowdown() {
         let speed = 2;
-        if( this.velocity.x > speed || this.velocity.x < -speed){
+        if (this.velocity.x > speed || this.velocity.x < -speed) {
             this.velocity.x *= 0.99;
         }
-        if( this.velocity.y > speed || this.velocity.y < -speed){
+        if (this.velocity.y > speed || this.velocity.y < -speed) {
             this.velocity.y *= 0.99;
         }
     }
-    speedup(){
+    speedup() {
         let speed = 3;
-        if( this.velocity.x < speed && this.velocity.x > -speed){
+        if (this.velocity.x < speed && this.velocity.x > -speed) {
             this.velocity.x *= 1.03;
         }
-        if( this.velocity.y < speed && this.velocity.y > -speed){
-            this.velocity.y*= 1.03;
+        if (this.velocity.y < speed && this.velocity.y > -speed) {
+            this.velocity.y *= 1.03;
         }
     }
 
@@ -153,16 +153,16 @@ export class Bubble {
         const ydiff = this.position.y - other.position.y;
         const distance = Math.sqrt(xdiff * xdiff + ydiff * ydiff); // Finds distance from center of circle A to B
         if (distance <= this.radius + other.radius) {
-            if (this.isUnlocked() && other.isUnlocked()){
-                    this.collisionResolution(other, distance);
-            }    
+            if (this.isUnlocked() && other.isUnlocked()) {
+                this.collisionResolution(other, distance);
+            }
             return false;
         }
         return true;
     }
     collisionResolution(other) {
         let mSum = this.mass + other.mass;
-    
+
         // Calculate the impact vector (normalized)
         let impact = {
             x: other.position.x - this.position.x,
@@ -171,26 +171,26 @@ export class Bubble {
         let magnitude = Math.sqrt(impact.x ** 2 + impact.y ** 2);
         impact.x /= magnitude;
         impact.y /= magnitude;
-    
+
         // Relative velocity
         let vDiff = {
             x: other.velocity.x - this.velocity.x,
             y: other.velocity.y - this.velocity.y
         };
-    
+
         // Dot product of relative velocity and impact vector
         let dotProduct = vDiff.x * impact.x + vDiff.y * impact.y;
-    
+
         // Skip if objects are moving away from each other
         if (dotProduct > 0) return;
-    
+
         // Calculate impulse scalar
         let impulse = (2 * dotProduct) / mSum;
-    
+
         // Update velocities
         this.velocity.x += (impulse * other.mass * impact.x);
         this.velocity.y += (impulse * other.mass * impact.y);
-    
+
         other.velocity.x -= (impulse * this.mass * impact.x);
         other.velocity.y -= (impulse * this.mass * impact.y);
     }

@@ -209,7 +209,7 @@ body {
     background-color: #1c3c81;
 }
 
-.fullcommentContainor {
+.fullcommentContainer {
     width: 90%;
     margin: 0 auto;
     margin-bottom: 20px;
@@ -235,7 +235,7 @@ body {
     text-decoration: underline;
 }
 
-.commentContainor {
+.commentContainer {
     max-height: 400px;
     max-width: 95%;
     margin: auto;

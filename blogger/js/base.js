@@ -177,7 +177,7 @@
         commentButton.addEventListener('click', () => handleComments(post.id, postBody));
 
         const commentContainer = document.createElement('div');
-        commentContainer.classList.add('fullcommentContainor');
+        commentContainer.classList.add('fullcommentContainer');
 
         postBody.appendChild(postTitle);
         postBody.appendChild(postContent);
@@ -218,38 +218,38 @@
     }
     async function handleComments(id, postbody) {
 
-        const fullcommentContainor = postbody.querySelector('.fullcommentContainor');
+        const fullcommentContainer = postbody.querySelector('.fullcommentContainer');
         const commentButt = postbody.querySelector('.commentButt');
         commentButt.disabled = true;
         if (commentButt.textContent === 'Show Comments') {
             const comments = await fetchComments(id);
             if (comments) {
-                const commentContainor = document.createElement('div');
-                commentContainor.classList.add('commentContainor');
-                fullcommentContainor.appendChild(commentContainor);
+                const commentContainer = document.createElement('div');
+                commentContainer.classList.add('commentContainer');
+                fullcommentContainer.appendChild(commentContainer);
 
                 console.log(comments);
-                comments.forEach(comment => newComment(comment, commentContainor, false));
-                addInput(fullcommentContainor);
-                fullcommentContainor.style.maxHeight = `${commentContainor.scrollHeight}px`;
-                commentButt.textContent = 'Remove Comments';
+                comments.forEach(comment => newComment(comment, commentContainer, false));
+                addInput(fullcommentContainer);
+                fullcommentContainer.style.maxHeight = `${commentContainer.scrollHeight}px`;
+                commentButt.textContent = 'Hide Comments';
             }
         }
         else {
-            fullcommentContainor.style.maxHeight = '0';
-            fullcommentContainor.addEventListener('transitionend', () => {
-                removeComents(fullcommentContainor);
+            fullcommentContainer.style.maxHeight = '0';
+            fullcommentContainer.addEventListener('transitionend', () => {
+                hideComments(fullcommentContainer);
             }, { once: true });
             commentButt.textContent = 'Show Comments';
         }
 
-        fullcommentContainor.addEventListener('transitionend', () => {
+        fullcommentContainer.addEventListener('transitionend', () => {
             commentButt.disabled = false;
         }, { once: true }
         );
 
     }
-    function newComment(comment, commentContainor, insertBefore) {
+    function newComment(comment, commentContainer, insertBefore) {
         const commentBody = document.createElement('div');
         commentBody.classList.add('commentBody');
 
@@ -264,15 +264,15 @@
         commentBody.appendChild(commenterName);
         commentBody.appendChild(commentText);
         if (insertBefore)
-            commentContainor.insertBefore(commentBody, commentContainor.firstChild);
+            commentContainer.insertBefore(commentBody, commentContainer.firstChild);
         else
-            commentContainor.appendChild(commentBody);
+            commentContainer.appendChild(commentBody);
     }
-    function removeComents(commentContainor) {
-        Array.from(commentContainor.children).forEach(child => child.remove());
+    function hideComments(commentContainer) {
+        Array.from(commentContainer.children).forEach(child => child.remove());
     }
 
-    function addInput(fullcommentContainor) {
+    function addInput(fullcommentContainer) {
         const inputBox = document.createElement('div');
         inputBox.classList.add('inputBox');
 
@@ -283,22 +283,22 @@
         const submit = document.createElement('button');
         submit.classList.add('submit');
         submit.textContent = 'Submit Comment';
-        submit.addEventListener('click', () => addSubmitedComent(fullcommentContainor));
+        submit.addEventListener('click', () => addSubmittedComment(fullcommentContainer));
 
         inputBox.appendChild(inputBar);
         inputBox.appendChild(submit);
-        fullcommentContainor.appendChild(inputBox);
+        fullcommentContainer.appendChild(inputBox);
     }
 
-    function addSubmitedComent(fullcommentContainor) {
-        const text = fullcommentContainor.querySelector('.inputBar');
+    function addSubmittedComment(fullcommentContainer) {
+        const text = fullcommentContainer.querySelector('.inputBar');
         const inputValue = text.value;
         console.log(inputValue);
         if (inputValue) {
             text.value = '';
             newComment(
                 { name: 'Anonymous', body: inputValue },
-                fullcommentContainor.querySelector('.commentContainor'),
+                fullcommentContainer.querySelector('.commentContainer'),
                 true
             );
         }
