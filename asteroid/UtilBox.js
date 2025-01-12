@@ -11,8 +11,8 @@ class Shape {
         this.re_spawn = re_spawn;
     }
     isOffScreen() {
-        const oldPosition = this.position;
-        const tempPosition = this.position;
+        const oldPosition = { ...this.position };
+        const tempPosition = { ...this.position };
         if (this.position.x > this.boundaries.right) tempPosition.x = this.boundaries.left;
         else if (this.position.x < this.boundaries.left) tempPosition.x = this.boundaries.right;
         else if (this.position.y > this.boundaries.bottom) tempPosition.y = this.boundaries.top;
@@ -20,7 +20,7 @@ class Shape {
         if (this.re_spawn) {
             this.position = tempPosition;
         }
-        return oldPosition != tempPosition;
+        return oldPosition.x !== tempPosition.x || oldPosition.y !== tempPosition.y;
     }
     update() {
         this.position.x += this.velocity.x;
@@ -78,24 +78,24 @@ export class Player extends Shape {
         this.friction = friction;
     }
     update(player) {
-            if (this.keys.ArrowRight.pressed) player.rotation += this.rotationSpeed;
-            if (this.keys.ArrowLeft.pressed) player.rotation -= this.rotationSpeed;
+        if (this.keys.ArrowRight.pressed) player.rotation += this.rotationSpeed;
+        if (this.keys.ArrowLeft.pressed) player.rotation -= this.rotationSpeed;
 
-            if (this.keys.ArrowUp.pressed) {
-                player.velocity.x = Math.cos(player.rotation) * this.speed;
-                player.velocity.y = Math.sin(player.rotation) * this.speed;
+        if (this.keys.ArrowUp.pressed) {
+            player.velocity.x = Math.cos(player.rotation) * this.speed;
+            player.velocity.y = Math.sin(player.rotation) * this.speed;
+        }
+        if (this.keys.ArrowDown.pressed) {
+            player.velocity.x = -Math.cos(player.rotation) * this.speed;
+            player.velocity.y = -Math.sin(player.rotation) * this.speed;
+        }
+        if (!this.keys.ArrowUp.pressed || !this.keys.ArrowDown.pressed) {
+            if (player.velocity) {
+                player.velocity.x *= this.friction;
+                player.velocity.y *= this.friction;
             }
-            if (this.keys.ArrowDown.pressed) {
-                player.velocity.x = -Math.cos(player.rotation) * this.speed;
-                player.velocity.y = -Math.sin(player.rotation) * this.speed;
-            }
-            if (!this.keys.ArrowUp.pressed || !this.keys.ArrowDown.pressed) {
-                if (player.velocity) {
-                    player.velocity.x *= this.friction;
-                    player.velocity.y *= this.friction;
-                }
-            }
-        
+        }
+
         super.update();
     }
     updateWindowHeight(length, height) {
@@ -133,6 +133,7 @@ export class Projectile extends Shape {
             }, ctx, false);
     }
     update() {
+        console.log(this.re_spawn);
         return super.update();
     }
     updateWindowHeight(length, height) {
@@ -213,9 +214,9 @@ export class Score {
     }
     update(newPoint) {
         if (newPoint) {
-            this.score += newPoint;
-            this.draw();
+            this.score += newPoint;  
         }
+         this.draw();
     }
 }
 

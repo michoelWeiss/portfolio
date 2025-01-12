@@ -1,10 +1,10 @@
-import { Player, Score} from './UtilBox.js';
-import  logicPackage  from './handleUtil.js';
+import { Player, Score } from './UtilBox.js';
+import logicPackage from './handleUtil.js';
 
-(function () {                                                   // resize is not working and game is ending after 1 asteroid is hit need to fix
+(function () {                                                   // resize is not working, game is ending after 1 asteroid is hit, can still "shoot" aftwer game is over,  need to fix
     const canvas = document.querySelector('#theCanvas');
     const ctx = canvas.getContext('2d');
-    
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -19,19 +19,23 @@ import  logicPackage  from './handleUtil.js';
     const asteroids = [];
     const sparks = [];
 
-    let point = 0;
+    let point;
     let intervalID;
-    let shoot = true;
+    let animationID;
+    let shoot;
+    let player;
+    let playersScore;
+    
 
     window.addEventListener('resize', () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        projectiles.forEach( projectile => projectile.updateWindowHeight(canvas.width, canvas.height));
-        asteroids.forEach( asteroid => asteroid.updateWindowHeight(canvas.width, canvas.height));
+        projectiles.forEach(projectile => projectile.updateWindowHeight(canvas.width, canvas.height));
+        asteroids.forEach(asteroid => asteroid.updateWindowHeight(canvas.width, canvas.height));
         logicHandler.update(canvas.width, canvas.height);
     });
 
-    window.addEventListener('keyup', (event) => {
+    const keyUpEvent = (event) => {
         switch (event.code) {
             case 'ArrowRight':
                 player.keys.ArrowRight.pressed = false;
@@ -49,9 +53,9 @@ import  logicPackage  from './handleUtil.js';
                 shoot = true;
                 break;
         }
-    });
-    
-    window.addEventListener('keydown', (event) => {
+    };
+
+    const keyDownEvent = (event) => {
         switch (event.code) {
             case 'ArrowRight':
                 player.keys.ArrowRight.pressed = true;
@@ -68,12 +72,58 @@ import  logicPackage  from './handleUtil.js';
             case 'Space':
                 if (shoot) {
                     projectiles.push(logicHandler.generateProjectile(player, PROJECTILE_SPEED));
+                    console.log(projectiles)
                     shoot = false;
                 }
                 break;
         }
-    });
+    };
 
+    const newGame = (event) =>{    // need to handle new game better      
+        if(event.code === 'Space')
+            buildGame();
+    };
+
+
+    function buildGame() {
+        window.removeEventListener('keydown', newGame);
+        point = 0;
+        shoot = true;
+        player = new Player(
+            { x: canvas.width / 2, y: canvas.height / 2 },
+            'white',
+            { top: -50, bottom: canvas.height + 50, left: -50, right: canvas.width + 50 },
+            ROTATIONAL_SPEED,
+            SPEED,
+            FRICTION,
+            ctx
+        );
+        playersScore = new Score(
+            { x: canvas.width - 100, y: 50 },
+            ctx
+        );
+
+        window.addEventListener('keydown', keyDownEvent);
+        window.addEventListener('keyup', keyUpEvent);
+
+        animate();
+        handleAsteroid();
+
+    }
+    function clearGame() {
+
+        point = null;
+        shoot = null;
+        player = null;
+        playersScore = null;
+
+        window.removeEventListener('keydown', keyDownEvent);
+        window.removeEventListener('keyup', keyUpEvent);
+        window.cancelAnimationFrame(animationID);
+        clearInterval(intervalID);
+
+        window.addEventListener('keydown', newGame);
+    }
     function handleAsteroid() {
         intervalID = window.setInterval(() => {
             asteroids.push(logicHandler.generateAsteroid());
@@ -81,38 +131,25 @@ import  logicPackage  from './handleUtil.js';
     };
 
     function handleSparks(x, y) {
-        sparks.push(logicHandler.generateSparks(x, y));
+        const sparkArray = logicHandler.generateSparks(x, y);
+        sparkArray.forEach(spark => sparks.push(spark));
     };
 
     function handleAsteroidSplit(asteroid) {
-        const flag = false;
+        let flag = false;
         const array = logicHandler.splitAsteroid(asteroid);
-        if(array.length){
+        if (array.length) {
             array.forEach(asteroid => asteroids.push(asteroid));
             flag = true;
         }
-    return flag;
+        return flag;
     }
 
-    const player = new Player(
-        { x: canvas.width / 2, y: canvas.height / 2 },
-        'white',
-        { top: -50, bottom: canvas.height + 50, left: -50, right: canvas.width + 50 },
-        ROTATIONAL_SPEED,
-        SPEED, 
-        FRICTION,
-        ctx
-    );
-
-    const playersScore = new Score(
-        { x: canvas.width - 100, y: 50 },
-        ctx
-    );
 
 
-    function animate() { 
-        
-        const animationID = window.requestAnimationFrame(animate);
+    function animate() {
+
+        animationID = window.requestAnimationFrame(animate);
 
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -120,35 +157,35 @@ import  logicPackage  from './handleUtil.js';
         player.update(player);
 
         sparks.forEach((spark, index) => {
-            if (spark.update()) {  
+            if (spark.update()) {
                 sparks.splice(index, 1);
             }
         });
 
-        for (let i = projectiles.length - 1; i >= 0; i--) {  
+        for (let i = projectiles.length - 1; i >= 0; i--) {
             const projectile = projectiles[i];
-
             if (projectile.update()) {
                 projectiles.splice(i, 1);
             }
         }
-        
+
         for (let i = asteroids.length - 1; i >= 0; i--) {
             const asteroid = asteroids[i];
-            if(asteroid.update() && asteroid.remove){
+            if (asteroid.update() && asteroid.remove) {
                 asteroids.splice(i, 1);
             }
             if (logicHandler.testTriangleCollision(asteroid, player.getVertices())) {  // need to handle game over
+                clearGame();
                 console.log('Game Over!!!');
-                window.cancelAnimationFrame(animationID);
-                clearInterval(intervalID);
             }
 
             for (let j = projectiles.length - 1; j >= 0; j--) {
                 const projectile = projectiles[j];
                 const collision = logicHandler.circleCollision(projectile, asteroid);
-                if (collision.collided) {  
+                if (collision.collided) {
+                    console.log(collision, asteroids, i);
                     handleSparks(collision.collisionPoint.x, collision.collisionPoint.y);
+                    console.log('test');
                     if (handleAsteroidSplit(asteroid)) point = 2;
                     else point = 1;
                     asteroids.splice(i, 1);
@@ -157,11 +194,9 @@ import  logicPackage  from './handleUtil.js';
             }
         }
 
-        playersScore.update(point); 
+        playersScore.update(point);
     }
-
-    animate();
-    handleAsteroid();
+    buildGame();
 }());
 
 

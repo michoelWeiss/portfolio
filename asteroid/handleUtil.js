@@ -78,8 +78,8 @@ export default function logicPackage(width, height, ctx) {
 
     function splitAsteroid(asteroid) {
 
+        const array = [];
         if (asteroid.radius >= 50) {
-            const array = [];
             let px;
             let vx;
             for (let i = 0; i < 2; i++) {
@@ -97,7 +97,7 @@ export default function logicPackage(width, height, ctx) {
                     asteroid.radius / 2,
                     'white',
                     logicPackage.ctx,
-                    { top: -radius, bottom: logicPackage.height + radius, left: -radius, right: logicPackage.width + radius }
+                    { top: -asteroid.radius, bottom: logicPackage.height + asteroid.radius, left: -asteroid.radius, right: logicPackage.width + asteroid.radius }
                 ));
             }
         }
@@ -155,12 +155,12 @@ export default function logicPackage(width, height, ctx) {
         );
     };
 
-    function update(width, height){
+    function update(width, height) {
         logicPackage.logicPackage.height = height;
         logicPackage.logicPackage.width = width;
     }
 
- function isPointOnLineSegment(x, y, start, end) {
+    function isPointOnLineSegment(x, y, start, end) {
         return (
             x >= Math.min(start.x, end.x) &&
             x <= Math.max(start.x, end.x) &&
