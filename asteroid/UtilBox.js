@@ -31,12 +31,12 @@ class Shape {
     }
     updateWindowHeight(length, height) {
         if (this.radius) {
-            this.right = length + this.radius;
-            this.bottom = height + this.radius;
+            this.boundaries.right = length + this.radius;
+            this.boundaries.bottom = height + this.radius;
         }
         else {
-            this.boundaries.right = length + 50;
-            this.boundaries.bottom = height + 50;
+            this.boundaries.right = length + 30;
+            this.boundaries.bottom = height + 30;
         }
     }
 }
@@ -68,6 +68,8 @@ export class Player extends Shape {
                 ctx.lineTo(position.x - 10, position.y - 10);
                 ctx.lineTo(position.x - 10, position.y + 10);
                 ctx.closePath();
+                ctx.fillStyle = 'black';
+                ctx.fill();
                 ctx.strokeStyle = color;
                 ctx.stroke();
                 ctx.restore();
@@ -133,7 +135,6 @@ export class Projectile extends Shape {
             }, ctx, false);
     }
     update() {
-        console.log(this.re_spawn);
         return super.update();
     }
     updateWindowHeight(length, height) {
@@ -158,6 +159,8 @@ export class Asteroid extends Shape {
                 ctx.beginPath();
                 ctx.arc(position.x, position.y, radius, 0, Math.PI * 2, false);
                 ctx.closePath();
+                ctx.fillStyle = 'black';
+                ctx.fill();
                 ctx.strokeStyle = color;
                 ctx.stroke();
             }, ctx, true);
@@ -166,7 +169,9 @@ export class Asteroid extends Shape {
         return super.update();
     }
     updateWindowHeight(length, height) {
+        console.log(length, height)
         super.updateWindowHeight(length, height);
+        console.log(this.boundaries)
     }
 }
 export class Spark extends Shape {
@@ -200,8 +205,9 @@ export class Spark extends Shape {
 }
 
 export class Score {
-    constructor(position, ctx) {
-        this.position = position;
+    constructor(position, positionOffset, ctx) {
+        this.position = { x: position.x + positionOffset.x, y: position.y + positionOffset.y };
+        this.positionOffset = positionOffset;
         this.ctx = ctx;
         this.score = 0;
     }
@@ -214,9 +220,27 @@ export class Score {
     }
     update(newPoint) {
         if (newPoint) {
-            this.score += newPoint;  
+            this.score += newPoint;
         }
-         this.draw();
+        this.draw();
+    }
+    updatePosition(position) {
+        this.position = { x: position.x + this.positionOffset.x, y: position.y + this.positionOffset.y };
+    }
+}
+
+export class Star {
+    constructor(position, color, ctx) {
+        this.position = position;
+        this.color = color;
+        this.ctx = ctx;
+    }
+    draw() {
+        this.ctx.beginPath();
+        this.ctx.arc(this.position.x, this.position.y, 1, 0, Math.PI * 2, false);
+        this.ctx.closePath();
+        this.ctx.fillStyle = this.color;
+        this.ctx.fill();
     }
 }
 

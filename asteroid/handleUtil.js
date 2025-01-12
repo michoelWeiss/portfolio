@@ -20,7 +20,7 @@ export default function logicPackage(width, height, ctx) {
                 velocity.y = initialDirection;
                 break;
             case 1:
-                position.x = canvas.logicPackage.width + radius;
+                position.x = logicPackage.width + radius;
                 position.y = Math.random() * logicPackage.height;
                 velocity.x = -1;
                 velocity.y = initialDirection;
@@ -33,7 +33,7 @@ export default function logicPackage(width, height, ctx) {
                 break;
             case 3:
                 position.x = Math.random() * logicPackage.width;
-                position.y = canvas.logicPackage.height + radius;
+                position.y = logicPackage.height + radius;
                 velocity.x = initialDirection;
                 velocity.y = -1;
                 break;
@@ -105,6 +105,7 @@ export default function logicPackage(width, height, ctx) {
     };
 
     function testTriangleCollision(circle, triangle) {
+        if(!circle || !triangle){return;}
         for (let i = 0; i < 3; i++) {
             let start = triangle[i];
             let end = triangle[(i + 1) % 3];
@@ -156,8 +157,8 @@ export default function logicPackage(width, height, ctx) {
     };
 
     function update(width, height) {
-        logicPackage.logicPackage.height = height;
-        logicPackage.logicPackage.width = width;
+        logicPackage.height = height;
+        logicPackage.width = width;
     }
 
     function isPointOnLineSegment(x, y, start, end) {
