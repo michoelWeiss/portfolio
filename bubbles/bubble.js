@@ -5,19 +5,19 @@ export class Bubble {
     #wallLocked = false;
     speedUp = false;
 
-    static canvasWidth = 800;  // defalt 
+    static canvasWidth = 800;  
     static canvasHeight = 600;
     static ID = 1;
 
-    constructor({ position, color, velocity, colorPhase }) {
+    constructor({ position, color, velocity, colorPhase, mass, radius }) {
         this.id = Bubble.ID++;
         this.position = position;
         this.velocity = velocity;
         this.acceleration = { x: 0, y: 0 };
-        this.mass = 5;
-        this.radius = Math.sqrt(this.mass) * 35;
+        this.mass = mass;
+        this.radius = Math.sqrt(this.mass) * radius;
         this.rgb = color;
-        this.phase = colorPhase;   // is the flag for the colorchanger
+        this.phase = colorPhase;   
 
         this.shadow = new Shadow(this.radius);
         this.reflection = new Reflection(this.radius);
