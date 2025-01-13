@@ -27,7 +27,7 @@ let player;
 let playersScore;
 let gameRunning;
 let shipExplodeInterval;
-let gameOverDisplay; 
+let gameOverDisplay;
 
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
@@ -38,53 +38,23 @@ window.addEventListener('resize', () => {
     playersScore?.updatePosition({ x: canvas.width, y: 0 });
     player?.updateWindowHeight(canvas.width, canvas.height);
     gameOverDisplay?.updatePosition({ x: canvas.width, y: canvas.height });
-    handleStars();
 });
-
-const keyUpEvent = (event) => {
-    switch (event.code) {
-        case 'ArrowRight':
-            player.keys.ArrowRight.pressed = false;
-            break;
-        case 'ArrowDown':
-            player.keys.ArrowDown.pressed = false;
-            break;
-        case 'ArrowLeft':
-            player.keys.ArrowLeft.pressed = false;
-            break;
-        case 'ArrowUp':
-            player.keys.ArrowUp.pressed = false;
-            break;
-        case 'Space':
+const keyEvent = (event) => {
+    const name = event.code;
+    if (name === 'ArrowRight' || name === 'ArrowDown' || name === 'ArrowLeft' || name === 'ArrowUp') {
+        player.keys[name].pressed = event.type === 'keydown';
+    }
+    else if (name === 'Space') {
+        if (event.type === 'keydown' && shoot) {
+            projectiles.push(logicHandler.generateProjectile(player, PROJECTILE_SPEED));
+            shoot = false;
+        }
+        else {
             shoot = true;
-            break;
+        }
     }
 };
-
-const keyDownEvent = (event) => {
-    switch (event.code) {
-        case 'ArrowRight':
-            player.keys.ArrowRight.pressed = true;
-            break;
-        case 'ArrowDown':
-            player.keys.ArrowDown.pressed = true;
-            break;
-        case 'ArrowLeft':
-            player.keys.ArrowLeft.pressed = true;
-            break;
-        case 'ArrowUp':
-            player.keys.ArrowUp.pressed = true;
-            break;
-        case 'Space':
-            if (shoot) {
-                projectiles.push(logicHandler.generateProjectile(player, PROJECTILE_SPEED));
-                shoot = false;
-            }
-            break;
-    }
-};
-
-const newGame = (event) => {       
+const newGame = (event) => {
     if (event.code === 'KeyR')
         clearAndResetGame();
 };
@@ -115,7 +85,7 @@ function handleStars() {
     const starsToCreate = 1500;
     for (let i = 0; i < starsToCreate; i++) {
         stars.push(new Star(
-            { x: Math.random() * canvas.width, y: Math.random() * canvas.height },
+            { x: Math.random() * canvas.width * 2, y: Math.random() * canvas.height * 2 },
             'white',
             ctx
         ));
@@ -155,8 +125,8 @@ function buildGame() {
     );
     gameOverDisplay = new GameOver({ x: canvas.width, y: canvas.height }, null, ctx);
 
-    window.addEventListener('keydown', keyDownEvent);
-    window.addEventListener('keyup', keyUpEvent);
+    window.addEventListener('keydown', keyEvent);
+    window.addEventListener('keyup', keyEvent);
     window.removeEventListener('keydown', newGame);
 
     animate();
@@ -179,8 +149,8 @@ function clearAndResetGame() {
 function gameOver() {
     gameRunning = false;
     gameOverDisplay.newScore(playersScore.currentScore());
-    window.removeEventListener('keydown', keyDownEvent);
-    window.removeEventListener('keyup', keyUpEvent);
+    window.removeEventListener('keydown', keyEvent);
+    window.removeEventListener('keyup', keyEvent);
     window.addEventListener('keydown', newGame);
     if (!shipExplodeInterval)
         shipExplodeInterval = setInterval(() => handleSparks(player.position.x, player.position.y, 1, 75, 1, 10), 100);

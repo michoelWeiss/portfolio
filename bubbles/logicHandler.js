@@ -3,8 +3,13 @@ import { Spark } from './decorations.js';
 
 export function LogicHandler (width, height, mass, radius, bubbleArray, sparkArray, ctx){
     LogicHandler.height = height;
-    LogicHandler.width = width;
+    LogicHandler.width = width;  
+    LogicHandler.makingBubbles = false;
 
+    function updateSize(width, height){
+        LogicHandler.height = height;
+        LogicHandler.width = width; 
+    }
     function handleBubbleGenerator(){
          createBubblesRecursively(numberOfBubblesPerScreenSize(), 600);
     }
@@ -16,7 +21,8 @@ export function LogicHandler (width, height, mass, radius, bubbleArray, sparkArr
     }
     
     function createBubblesRecursively(count, delay) {
-        if (count <= 0) return;
+        if (count <= 0) { LogicHandler.makingBubbles = false; return;}
+        LogicHandler.makingBubbles = true;
         setTimeout(() => {
             bubbleArray.push(createBubble());
             createBubblesRecursively(count - 1, delay);
@@ -26,7 +32,7 @@ export function LogicHandler (width, height, mass, radius, bubbleArray, sparkArr
         return new Bubble({
             position: {
                 x: 100,
-                y: LogicHandler.height
+                y: LogicHandler.height + 200   // extra room so bubbles can manafest below the screen 
             },
             velocity: {
                 x: (3 * Math.random()),
@@ -35,7 +41,10 @@ export function LogicHandler (width, height, mass, radius, bubbleArray, sparkArr
             colorPhase: Math.floor(6 * Math.random()),
             color: firstColor(),
             mass,
-            radius
+            radius, 
+            width : LogicHandler.width, 
+            height: LogicHandler.height,
+            ctx
         });
     }
     
@@ -48,31 +57,32 @@ export function LogicHandler (width, height, mass, radius, bubbleArray, sparkArr
 
     function createSparks(mouseX, mouseY, color) {
         for (let i = 0; i < 20; i++) {
-            sparkArray.push(new Spark(mouseX, mouseY, color));
+            sparkArray.push(new Spark(mouseX, mouseY, color, ctx));
         }
     }
 
     function removeBubble(event) {
         const mouseX = event.clientX;
         const mouseY = event.clientY;
-        for (let i = bubbleArray.length - 1; i >= 0; i--) {
-            let bubble = bubbleArray[i];
-            const xdiff = mouseX - bubble.position.x;
+        bubbleArray.forEach( (bubble, index) => {
+             const xdiff = mouseX - bubble.position.x;
             const ydiff = mouseY - bubble.position.y;
             const distance = Math.sqrt(xdiff * xdiff + ydiff * ydiff);
-            if (distance < bubble.radius) {
-                bubbleArray.splice(i, 1);
+             if (distance < bubble.radius) {
+                bubbleArray.splice(index, 1);
                 createSparks(mouseX, mouseY, bubble.rgb);
-                setTimeout(() => {
-                    bubbleArray.push(createBubble());
-                }, 3000);
+                const maxNumOfBubbles = numberOfBubblesPerScreenSize();
+                const makeNew = maxNumOfBubbles - bubbleArray.length;
+                if(makeNew > 0 && !LogicHandler.makingBubbles)
+                    createBubblesRecursively(makeNew, 1000);
             }
-        }
+        });
     }
     return{
         handleBubbleGenerator,
         createSparks,
         createBubble,
-        removeBubble
+        removeBubble,
+        updateSize
     };
 }

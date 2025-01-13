@@ -1,12 +1,10 @@
-import { Spark } from './decorations.js';
-import { Bubble } from './bubble.js';
 import { LogicHandler } from './logicHandler.js';
 
-const canvas = document.querySelector('#theCanvas');   // need to make the size dynamic
+const canvas = document.querySelector('#theCanvas');
 const ctx = canvas.getContext('2d');
 
 canvas.width = window.innerWidth;
-canvas.height = window.innerHeight + 200;  // extra room so bubbles can manafest below the screen 
+canvas.height = window.innerHeight;
 
 const BubbleRadius = 35;
 const BubbleMass = 5;
@@ -14,9 +12,16 @@ const BubbleMass = 5;
 let sparks = [];
 let bubbles = [];
 
-Bubble.setCanvasDimensions(window.innerWidth, window.innerHeight);
+const handleResize = () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    logicHandler.updateSize(canvas.width, canvas.height);
+    bubbles.forEach(bubble => bubble.setCanvasDimensions(canvas.width, canvas.height));
+};
 const logicHandler = LogicHandler(canvas.width, canvas.height, BubbleMass, BubbleRadius, bubbles, sparks, ctx);
 
+window.addEventListener('resize', handleResize);
+window.addEventListener('fullscreenchange', handleResize);
 canvas.addEventListener('click', logicHandler.removeBubble);
 
 logicHandler.handleBubbleGenerator();
@@ -24,7 +29,7 @@ animate();
 
 function animate() {
     ctx.fillStyle = 'rgba(210, 210, 210, .8)';
-    ctx.fillRect(0, 0, window.innerWidth, window.innerHeight);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     bubbles.forEach((bubble, index) => {
         let unlock = true;
@@ -36,20 +41,11 @@ function animate() {
 
         if (unlock && bubble.isWallLocked())
             bubble.unlock();
-        bubble.update(ctx);
+        bubble.update();
     });
-    for (let i = 0; i < bubbles.length; i++) {
-        const bubble = bubbles[i];
 
-
-
-
-
-
-    }
     sparks.forEach((spark, index) => {
-        spark.update(ctx);
-        if (spark.isDead()) {
+        if (spark.update()) {
             sparks.splice(index, 1);
         }
     });

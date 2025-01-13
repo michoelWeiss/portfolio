@@ -5,60 +5,65 @@ export class Bubble {
     #wallLocked = false;
     speedUp = false;
 
-    static canvasWidth = 800;  
-    static canvasHeight = 600;
     static ID = 1;
 
-    constructor({ position, color, velocity, colorPhase, mass, radius }) {
+    constructor({ position, color, velocity, colorPhase, mass, radius, width, height, ctx}) {
         this.id = Bubble.ID++;
+        this.canvasWidth = width;
+        this.canvasHeight = height
+        this.ctx = ctx;
         this.position = position;
         this.velocity = velocity;
-        this.acceleration = { x: 0, y: 0 };
         this.mass = mass;
         this.radius = Math.sqrt(this.mass) * radius;
         this.rgb = color;
-        this.phase = colorPhase;   
+        this.border = {top: this.radius, bottom: this.canvasHeight - this.radius, left: this.radius, right: this.canvasWidth - this.radius};
+        this.phase = {
+            index: colorPhase,
+            rgbIndex: [{ num: 0, increaseColor: true },
+            { num: 1, increaseColor: true }, { num: 0, increaseColor: false },
+            { num: 2, increaseColor: true }, { num: 1, increaseColor: false },
+            { num: 0, increaseColor: true }, { num: 2, increaseColor: false },
+            ]
+        };
 
-        this.shadow = new Shadow(this.radius);
-        this.reflection = new Reflection(this.radius);
+        this.shadow = new Shadow(this.radius, this.ctx);
+        this.reflection = new Reflection(this.radius, this.ctx);
 
         this.colorIterator = this.colorIterator.bind(this);                              // binds ColorIterator to this instince
         setInterval(this.colorIterator, 50);                                             // Handles Changing Colors
-        this.i = setInterval(() => { this.lockWall(); clearInterval(this.i) }, 2500);    // Handles Locking Wall after bubble generates
+        this.i = setInterval(() => { this.lockWall(); clearInterval(this.i) }, 1000);    // Handles Locking Wall after bubble generates
         setInterval(() => this.speedUp = !this.speedUp, (2000 * Math.random() + 3000));  // to speedup and slowdown 
     }
 
-    static setCanvasDimensions(width, height) {
+    setCanvasDimensions(width, height) {
         this.canvasWidth = width;
         this.canvasHeight = height;
+        this.border = {top: this.radius, bottom: this.canvasHeight - this.radius, left: this.radius, right: this.canvasWidth - this.radius};
     }
 
-    draw(ctx) {                                   // Draw Bubble
+    draw() {                                   // Draw Bubble
         const { x, y } = this.position;
-        ctx.beginPath();
-        this.gradient = ctx.createRadialGradient(x, y, this.radius * 0.7, x, y, this.radius);
+        this.ctx.beginPath();
+        this.gradient = this.ctx.createRadialGradient(x, y, this.radius * 0.7, x, y, this.radius);
         this.gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
         this.gradient.addColorStop(0.5, `rgba(${this.rgb[0]}, ${this.rgb[1]}, ${this.rgb[2]}, 0.3)`);
         this.gradient.addColorStop(0.9, `rgba(${this.rgb[0]}, ${this.rgb[1]}, ${this.rgb[2]}, 1)`);
         this.gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
-        ctx.arc(x, y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.gradient;
-        ctx.fill();
-        ctx.closePath();
+        this.ctx.arc(x, y, this.radius, 0, Math.PI * 2);
+        this.ctx.fillStyle = this.gradient;
+        this.ctx.fill();
+        this.ctx.closePath();
         // Draw Decorations 
-        this.reflection.draw(this.position, ctx);
-        this.shadow.draw(this.position, ctx);
+        this.reflection.draw(this.position);
+        this.shadow.draw(this.position);
     }
-    update(ctx) {
-        this.velocity.x += this.acceleration.x;
-        this.velocity.y += this.acceleration.y;
+    update() {
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
-
-
         this.hitWall();
         (this.speedUp ? this.speedup() : this.slowdown());
-        this.draw(ctx);
+        this.draw();
     }
     slowdown() {
         let speed = 2;
@@ -80,68 +85,41 @@ export class Bubble {
     }
 
     colorIterator() {
-
-        if (this.phase === 0) {
-            this.rgb[0] += 10;
-            if (this.rgb[0] >= 255) {
-                this.rgb[0] = 255;
-                this.phase = 1;
-            }
-        } else if (this.phase === 1) {
-            this.rgb[1] += 10;
-            if (this.rgb[1] >= 255) {
-                this.rgb[1] = 255;
-                this.phase = 2;
-            }
-        } else if (this.phase === 2) {
-            this.rgb[0] -= 10;
-            if (this.rgb[0] <= 0) {
-                this.rgb[0] = 0;
-                this.phase = 3;
-            }
-        } else if (this.phase === 3) {
-            this.rgb[2] += 10;
-            if (this.rgb[2] >= 255) {
-                this.rgb[2] = 255;
-                this.phase = 4;
-            }
-        } else if (this.phase === 4) {
-            this.rgb[1] -= 10;
-            if (this.rgb[1] <= 0) {
-                this.rgb[1] = 0;
-                this.phase = 5;
-            }
-        } else if (this.phase === 5) {
-            this.rgb[0] += 10;
-            if (this.rgb[0] >= 255) {
-                this.rgb[0] = 255;
-                this.phase = 6;
-            }
-        } else if (this.phase === 6) {
-            this.rgb[2] -= 10;
-            if (this.rgb[2] <= 0) {
-                this.rgb[2] = 0;
-                this.phase = 0;
+        const rgbIndex = this.phase.rgbIndex[this.phase.index];
+        if(rgbIndex.increaseColor){
+            this.rgb[rgbIndex.num] += 10;
+            if ( this.rgb[rgbIndex.num] >= 255) {
+                this.rgb[rgbIndex.num] = 255;
+                this.phase.index += 1;
             }
         }
+        else{
+            this.rgb[rgbIndex.num] -= 10;
+            if (this.rgb[rgbIndex.num] <= 0) {
+                this.rgb[rgbIndex.num] = 0;
+                this.phase.index += 1;
+            }
+        }
+        if(this.phase.index >= this.phase.rgbIndex.length)
+            this.phase.index = 0;
     }
 
     hitWall() {
-        if (this.position.x > Bubble.canvasWidth - this.radius) {
-            this.position.x = Bubble.canvasWidth - this.radius;
+        if (this.position.x >  this.border.right) {
+            this.position.x = this.border.right;
             this.velocity.x *= -1;
         }
-        else if (this.position.x < this.radius) {
-            this.position.x = this.radius;
+        else if (this.position.x < this.border.left) {
+            this.position.x = this.border.left;
             this.velocity.x *= -1;
         }
         if (this.#wallLocked) {
-            if (this.position.y > Bubble.canvasHeight - this.radius) {
-                this.position.y = Bubble.canvasHeight - this.radius;
+            if (this.position.y > this.border.bottom) {
+                this.position.y = this.border.bottom;
                 this.velocity.y *= -1;
             }
-            else if (this.position.y < this.radius) {
-                this.position.y = this.radius;
+            else if (this.position.y < this.border.top) {
+                this.position.y = this.border.top;
                 this.velocity.y *= -1;
             }
         }
