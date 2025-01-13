@@ -1,4 +1,3 @@
-
 class Shape {
     constructor(position, velocity, radius, color, boundaries, draw, ctx, re_spawn) {
         this.position = position;
@@ -35,8 +34,8 @@ class Shape {
             this.boundaries.bottom = height + this.radius;
         }
         else {
-            this.boundaries.right = length + 30;
-            this.boundaries.bottom = height + 30;
+            this.boundaries.right = length + 20;
+            this.boundaries.bottom = height + 20;
         }
     }
 }
@@ -79,26 +78,33 @@ export class Player extends Shape {
         this.speed = speed;
         this.friction = friction;
     }
-    update(player) {
-        if (this.keys.ArrowRight.pressed) player.rotation += this.rotationSpeed;
-        if (this.keys.ArrowLeft.pressed) player.rotation -= this.rotationSpeed;
+    update(gameRunning) {
+        if (gameRunning) {
+            if (this.keys.ArrowRight.pressed) this.rotation += this.rotationSpeed;
+            if (this.keys.ArrowLeft.pressed) this.rotation -= this.rotationSpeed;
 
-        if (this.keys.ArrowUp.pressed) {
-            player.velocity.x = Math.cos(player.rotation) * this.speed;
-            player.velocity.y = Math.sin(player.rotation) * this.speed;
-        }
-        if (this.keys.ArrowDown.pressed) {
-            player.velocity.x = -Math.cos(player.rotation) * this.speed;
-            player.velocity.y = -Math.sin(player.rotation) * this.speed;
-        }
-        if (!this.keys.ArrowUp.pressed || !this.keys.ArrowDown.pressed) {
-            if (player.velocity) {
-                player.velocity.x *= this.friction;
-                player.velocity.y *= this.friction;
+            if (this.keys.ArrowUp.pressed) {
+                this.velocity.x = Math.cos(this.rotation) * this.speed;
+                this.velocity.y = Math.sin(this.rotation) * this.speed;
+            }
+            if (this.keys.ArrowDown.pressed) {
+                this.velocity.x = -Math.cos(this.rotation) * this.speed;
+                this.velocity.y = -Math.sin(this.rotation) * this.speed;
             }
         }
-
+        else {
+            this.decelerate();
+        }
+        if (!this.keys.ArrowUp.pressed && !this.keys.ArrowDown.pressed) {
+            if (this.velocity.x || this.velocity.y) {
+                this.decelerate();
+            }
+        }
         super.update();
+    }
+    decelerate() {
+        this.velocity.x *= this.friction;
+        this.velocity.y *= this.friction;
     }
     updateWindowHeight(length, height) {
         super.updateWindowHeight(length, height);
@@ -122,7 +128,6 @@ export class Player extends Shape {
         ]
     }
 }
-
 export class Projectile extends Shape {
     constructor(position, velocity, radius, color, ctx, boundaries) {
         super(position, velocity, radius, color, boundaries,
@@ -141,7 +146,6 @@ export class Projectile extends Shape {
         super.updateWindowHeight(length, height);
     }
 }
-
 export class Asteroid extends Shape {
     #countdown = 15;
     remove = false;
@@ -175,8 +179,9 @@ export class Asteroid extends Shape {
     }
 }
 export class Spark extends Shape {
-    constructor(position, color, ctx) {
-        super(position, { x: (Math.random() - 0.5) * 8, y: (Math.random() - 0.5) * 8 }, 1, color, { top: 0, bottom: 0, left: 0, right: 0 },
+    constructor(position, color, ctx, radius, lifespan = 100, alpha = 1) {
+        radius = radius ? radius : 1;
+        super(position, { x: (Math.random() - 0.5) * 8, y: (Math.random() - 0.5) * 8 }, radius, color, { top: 0, bottom: 0, left: 0, right: 0 },
             (position, color, ctx, radius) => {
                 ctx.save();
                 ctx.globalAlpha = this.alpha;
@@ -186,8 +191,8 @@ export class Spark extends Shape {
                 ctx.fill();
                 ctx.restore();
             }, ctx, false);
-        this.alpha = 1;
-        this.lifespan = 100;
+        this.alpha = alpha;
+        this.lifespan = lifespan;
 
     }
     isDead() {
@@ -203,7 +208,6 @@ export class Spark extends Shape {
         super.updateWindowHeight(length, height);
     }
 }
-
 export class Score {
     constructor(position, positionOffset, ctx) {
         this.position = { x: position.x + positionOffset.x, y: position.y + positionOffset.y };
@@ -227,8 +231,64 @@ export class Score {
     updatePosition(position) {
         this.position = { x: position.x + this.positionOffset.x, y: position.y + this.positionOffset.y };
     }
+    currentScore() {
+        return this.score;
+    }
 }
+export class GameOver {
+    constructor(position, score, ctx) {
+        this.position = { x: position.x / 2, y: position.y / 2 };
+        this.ctx = ctx;
+        this.score = score;
 
+        this.alpha = 1;
+        this.fadeDirection = -1;
+        this.fadeInterval = 3000;
+        this.fadeCooldown = 1000;
+        this.lastFadeTime = Date.now();
+    }
+    draw() {
+        this.ctx.save();
+        this.ctx.globalAlpha = this.alpha;
+        this.ctx.font = '50px Arial';
+        this.ctx.fillStyle = 'blue';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('Game Over: Your Score is ' + this.score, this.position.x, this.position.y);
+        this.ctx.font = '20px Arial';
+        this.ctx.fillStyle = 'gray';
+        this.ctx.fillText('Press R to play again', this.position.x, this.position.y + 40);
+        this.ctx.restore();
+    }
+    update() {
+        const now = Date.now();
+
+        if (this.fadeDirection === -1 && this.alpha <= 0) {
+            // Fully faded out, start cooldown before fading back in
+            if (now - this.lastFadeTime >= this.fadeCooldown) {
+                this.fadeDirection = 1;
+                this.lastFadeTime = now;
+            }
+        } else if (this.fadeDirection === 1 && this.alpha >= 1) {
+            if (now - this.lastFadeTime >= this.fadeInterval) {
+                this.fadeDirection = -1;
+                this.lastFadeTime = now;
+            }
+        } else {
+            const fadeSpeed = 0.01;
+            this.alpha += fadeSpeed * this.fadeDirection;
+            this.alpha = Math.max(0, Math.min(1, this.alpha));
+        }
+
+        this.draw();
+    }
+    updatePosition(position) {
+        this.position = { x: position.x / 2, y: position.y / 2 };
+    }
+    newScore(score) {
+        this.score = score;
+    }
+}
 export class Star {
     constructor(position, color, ctx) {
         this.position = position;
@@ -242,6 +302,7 @@ export class Star {
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
     }
+    
 }
 
 

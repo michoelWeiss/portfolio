@@ -48,10 +48,10 @@ export default function logicPackage(width, height, ctx) {
         ));
     };
 
-    function generateSparks(x, y) {
+    function generateSparks( x, y, radius, lifespan, alpha, amount = 100) {
         const array = [];
-        for (let i = 0; i < 100; i++) {
-            array.push(new Spark({ x, y }, 'white', logicPackage.ctx));
+        for (let i = 0; i < amount; i++) {
+            array.push(new Spark({ x, y }, 'white', logicPackage.ctx, radius, lifespan, alpha));
         }
         return array;
     };
@@ -105,38 +105,40 @@ export default function logicPackage(width, height, ctx) {
     };
 
     function testTriangleCollision(circle, triangle) {
-        if(!circle || !triangle){return;}
+        if (!circle || !triangle) {
+            return null;
+        }
         for (let i = 0; i < 3; i++) {
             let start = triangle[i];
             let end = triangle[(i + 1) % 3];
-
+        
             let dx = end.x - start.x;
             let dy = end.y - start.y;
             let length = Math.sqrt(dx * dx + dy * dy);
-
+        
             let dot =
                 ((circle.position.x - start.x) * dx +
                     (circle.position.y - start.y) * dy) /
                 Math.pow(length, 2);
-
+        
             let closestX = start.x + dot * dx;
             let closestY = start.y + dot * dy;
-
+        
             if (!isPointOnLineSegment(closestX, closestY, start, end)) {
                 closestX = closestX < start.x ? start.x : end.x;
                 closestY = closestY < start.y ? start.y : end.y;
             }
-
+        
             dx = closestX - circle.position.x;
             dy = closestY - circle.position.y;
-
+        
             let distance = Math.sqrt(dx * dx + dy * dy);
-
+        
             if (distance <= circle.radius) {
-                return true;
+                return { x: closestX, y: closestY };
             }
         }
-        return false;
+        return null;
     };
 
     function generateProjectile(player, speed) {
@@ -149,7 +151,7 @@ export default function logicPackage(width, height, ctx) {
                 x: Math.cos(player.rotation) * speed,
                 y: Math.sin(player.rotation) * speed
             },
-            5,       // radius
+            3,       // radius
             'white',
             logicPackage.ctx,
             { top: -3, bottom: logicPackage.height + 3, left: -3, right: logicPackage.width + 3 }
