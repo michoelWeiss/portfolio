@@ -22,7 +22,7 @@ const logicHandler = LogicHandler(canvas.width, canvas.height, BubbleMass, Bubbl
 
 window.addEventListener('resize', handleResize);
 window.addEventListener('fullscreenchange', handleResize);
-canvas.addEventListener('click', logicHandler.removeBubble);
+canvas.addEventListener('mousedown', logicHandler.removeBubble);
 
 logicHandler.handleBubbleGenerator();
 animate();
@@ -33,9 +33,9 @@ function animate() {
 
     bubbles.forEach((bubble, index) => {
         let unlock = true;
-        let j = (bubble.isUnlocked() ? index + 1 : 0);
+        let j = 0;
         for (; j < bubbles.length; j++) {
-            if (!bubble.collisionDetector(bubbles[j]))
+            if (!bubble.checkIfCollided(bubbles[j]))
                 unlock = false;
         }
 
