@@ -190,7 +190,7 @@ function animate() {
                 removeAsteroids(collision.collisionPoint, i);
                 projectiles.splice(j, 1);
                 if (handleAsteroidSplit(asteroid)) point = 2;
-                else point = 15;
+                else point = 1;
             }
         }
     }
