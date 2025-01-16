@@ -33,8 +33,7 @@ function animate() {
 
     bubbles.forEach((bubble, index) => {
         let unlock = true;
-        let j = 0;
-        for (; j < bubbles.length; j++) {
+        for (let j = 0; j < bubbles.length; j++) {
             if (!bubble.checkIfCollided(bubbles[j]))
                 unlock = false;
         }
