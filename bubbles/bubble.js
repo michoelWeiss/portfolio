@@ -73,7 +73,7 @@ export class Bubble {
         gradient.addColorStop(0.9, `rgba(${this.rgb[0]}, ${this.rgb[1]}, ${this.rgb[2]}, 1)`);
         gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
         this.ctx.arc(x, y, this.radius, 0, Math.PI * 2);
-        this.ctx.fillStyle = 'red';
+        this.ctx.fillStyle = gradient;
         this.ctx.fill();
         this.ctx.closePath();
         // Draw Decorations 
