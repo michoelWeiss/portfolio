@@ -5,6 +5,9 @@ export function LogicHandler (width, height, mass, radius, bubbleArray, sparkArr
     LogicHandler.height = height;
     LogicHandler.width = width;  
     LogicHandler.makingBubbles = false;
+    LogicHandler.popSound = document.createElement('audio');
+    LogicHandler.popSound.src = './Audio/popSound.mp3'; 
+    LogicHandler.popSound.volume = 0.1;
 
     function updateSize(width, height){
         LogicHandler.height = height;
@@ -69,6 +72,10 @@ export function LogicHandler (width, height, mass, radius, bubbleArray, sparkArr
             const ydiff = mouseY - bubble.position.y;
             const distance = Math.sqrt(xdiff * xdiff + ydiff * ydiff);
              if (distance < bubble.radius) {
+                if (!LogicHandler.popSound.paused) {
+                    LogicHandler.popSound.currentTime = 0;
+                }
+                LogicHandler.popSound.play();
                 bubbleArray.splice(index, 1);
                 createSparks(mouseX, mouseY, bubble.rgb);
                 const maxNumOfBubbles = numberOfBubblesPerScreenSize();

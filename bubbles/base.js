@@ -12,6 +12,7 @@ const BubbleMass = 5;
 let sparks = [];
 let bubbles = [];
 
+
 const handleResize = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
