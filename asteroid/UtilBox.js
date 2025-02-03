@@ -173,9 +173,7 @@ export class Asteroid extends Shape {
         return super.update();
     }
     updateWindowHeight(length, height) {
-        console.log(length, height)
         super.updateWindowHeight(length, height);
-        console.log(this.boundaries)
     }
 }
 export class Spark extends Shape {

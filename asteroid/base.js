@@ -58,7 +58,7 @@ const keyEvent = (event) => {
         player.keys[name].pressed = event.type === 'keydown';
     }
     else if (name === 'Space') {
-        if (event.type === 'keydown' && shoot) {
+        if(event.type === 'keydown' && shoot) {
             if (!shootingSound.paused) {
                 shootingSound.currentTime = 0;
             }
@@ -67,9 +67,10 @@ const keyEvent = (event) => {
             projectiles.push(logicHandler.generateProjectile(player, PROJECTILE_SPEED));
             shoot = false;
         }
-        else {
+        else if (event.type === 'keyup') {
             shoot = true;
         }
+        
     }
 };
 const newGame = (event) => {
@@ -135,7 +136,7 @@ function buildGame() {
         SPEED,
         FRICTION,
         ctx
-    ); console.log(player)
+    ); 
     playersScore = new Score(
         { x: canvas.width, y: 0 },
         { x: -100, y: 50 },
