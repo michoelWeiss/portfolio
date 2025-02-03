@@ -29,6 +29,19 @@ let gameRunning;
 let shipExplodeInterval;
 let gameOverDisplay;
 
+const explosionSound = document.createElement('audio');
+explosionSound.src = './Audio/explosionSound.mp3';
+explosionSound.volume = 0.1;
+
+const shootingSound = document.createElement('audio');
+shootingSound.src = './Audio/blasterSound.mp3';
+shootingSound.volume = 0.05;
+
+const backgroundSound = document.createElement('audio');
+backgroundSound.src = './Audio/Background-Music.mp3';
+backgroundSound.volume = 0.3;
+backgroundSound.loop = true;
+
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -46,6 +59,11 @@ const keyEvent = (event) => {
     }
     else if (name === 'Space') {
         if (event.type === 'keydown' && shoot) {
+            if (!shootingSound.paused) {
+                shootingSound.currentTime = 0;
+            }
+            shootingSound.play();
+            backgroundSound.play(); //temp
             projectiles.push(logicHandler.generateProjectile(player, PROJECTILE_SPEED));
             shoot = false;
         }
@@ -187,6 +205,10 @@ function animate() {
             const projectile = projectiles[j];
             const collision = logicHandler.circleCollision(projectile, asteroid);
             if (collision.collided) {
+                if (!explosionSound.paused) {
+                    explosionSound.currentTime = 0;
+                }
+                explosionSound.play();
                 removeAsteroids(collision.collisionPoint, i);
                 projectiles.splice(j, 1);
                 if (handleAsteroidSplit(asteroid)) point = 2;
