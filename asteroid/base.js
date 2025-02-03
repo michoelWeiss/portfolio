@@ -197,6 +197,10 @@ function animate() {
         }
         const crash = logicHandler.testTriangleCollision(asteroid, player?.getVertices());
         if (crash) {
+            if(!explosionSound.paused){
+                explosionSound.currentTime = 0;
+            }
+            explosionSound.play();
             removeAsteroids(crash, i);
             gameOver();
             console.log('Game Over!!!');

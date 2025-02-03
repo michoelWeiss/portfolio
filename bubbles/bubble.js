@@ -49,7 +49,7 @@ export class Bubble {
         this.reflection = new Reflection(this.radius, this.ctx);
 
         this.colorIterator = this.colorIterator.bind(this);                             // Handles Changing Colors
-        setInterval(this.colorIterator, 50);                                             
+        setInterval(this.colorIterator, 50);
 
         this.i = setInterval(() => { this.lockWall(); clearInterval(this.i) }, 1000);    // Handles Locking Wall after bubble generates
 
@@ -67,7 +67,7 @@ export class Bubble {
     draw() {
         const { x, y } = this.position;
         this.ctx.beginPath();
-         const gradient = this.ctx.createRadialGradient(x, y, this.radius * 0.7, x, y, this.radius);
+        const gradient = this.ctx.createRadialGradient(x, y, this.radius * 0.7, x, y, this.radius);
         gradient.addColorStop(0, `rgba(255, 255, 255, 0)`);
         gradient.addColorStop(0.5, `rgba(${this.rgb[0]}, ${this.rgb[1]}, ${this.rgb[2]}, 0.3)`);
         gradient.addColorStop(0.9, `rgba(${this.rgb[0]}, ${this.rgb[1]}, ${this.rgb[2]}, 1)`);
