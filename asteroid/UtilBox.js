@@ -287,6 +287,24 @@ export class GameOver {
         this.score = score;
     }
 }
+
+export class PauseMessage {
+    constructor(size, ctx) {
+        this.position = { x: size.x / 2, y: size.y * 0.25 };
+        this.ctx = ctx;
+    }
+    draw() {
+        this.ctx.font = '40px Arial';
+        this.ctx.fillStyle = 'blue';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('Paused', this.position.x, this.position.y);
+
+    }
+    updatePosition(size) {
+        this.position = { x: size.x / 2, y: size.y / 2 };
+    }
+}
 export class Star {
     constructor(position, color, ctx) {
         this.position = position;

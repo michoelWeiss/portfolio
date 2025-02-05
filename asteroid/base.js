@@ -1,4 +1,4 @@
-import { Player, Score, Star, GameOver } from './UtilBox.js';
+import { Player, Score, Star, GameOver, PauseMessage } from './UtilBox.js';
 import logicPackage from './handleUtil.js';
 
 const canvas = document.querySelector('#theCanvas');
@@ -8,7 +8,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const logicHandler = logicPackage(canvas.width, canvas.height, ctx);
-
+const pauseGameDisplay = new PauseMessage({ x: canvas.width, y: canvas.height }, ctx);
 const SPEED = 8;
 const ROTATIONAL_SPEED = 0.12;
 const FRICTION = 0.98;
@@ -28,6 +28,7 @@ let playersScore;
 let gameRunning;
 let shipExplodeInterval;
 let gameOverDisplay;
+let isPaused = false;
 
 const explosionSound = document.createElement('audio');
 explosionSound.src = './Audio/explosionSound.mp3';
@@ -42,6 +43,52 @@ backgroundSound.src = './Audio/Background-Music.mp3';
 backgroundSound.volume = 0.3;
 backgroundSound.loop = true;
 
+const settingsButton = document.querySelector('#settings-button');
+const settingsForm = document.querySelector('#settings');
+const backgroundVolume = document.querySelector('#background-volume');
+const blasterVolume = document.querySelector('#blaster-volume');
+const explosionVolume = document.querySelector('#explosion-volume');
+
+document.querySelector('#test-blaster').addEventListener('click', () => {
+    event.preventDefault();
+    if (!shootingSound.paused) {
+        shootingSound.currentTime = 0;
+    }
+    shootingSound.play();
+});
+document.querySelector('#test-explosion').addEventListener('click', () => {
+    event.preventDefault();
+    if (!explosionSound.paused) {
+        explosionSound.currentTime = 0;
+    }
+    explosionSound.play();
+});
+
+settingsButton.addEventListener('click', () => {
+    if (settingsForm.classList.contains('show')) {
+        settingsForm.classList.remove('show');
+        isPaused = false;
+        animate()
+    } else {
+        settingsForm.classList.add('show');
+        isPaused = true;
+        requestAnimationFrame(displayPause);
+    }
+});
+
+
+function displayPause() {
+    if (isPaused) {
+        pauseGameDisplay.draw();
+        requestAnimationFrame(displayPause);
+    }
+}
+
+
+backgroundVolume.addEventListener('input', () => backgroundSound.volume = parseFloat(backgroundVolume.value));
+blasterVolume.addEventListener('change', () => shootingSound.volume = parseFloat(blasterVolume.value));
+explosionVolume.addEventListener('change', () => explosionSound.volume = parseFloat(explosionVolume.value));
+
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -51,6 +98,7 @@ window.addEventListener('resize', () => {
     playersScore?.updatePosition({ x: canvas.width, y: 0 });
     player?.updateWindowHeight(canvas.width, canvas.height);
     gameOverDisplay?.updatePosition({ x: canvas.width, y: canvas.height });
+    pauseGameDisplay?.updatePosition({ x: canvas.width, y: canvas.height });
 });
 const keyEvent = (event) => {
     const name = event.code;
@@ -58,11 +106,11 @@ const keyEvent = (event) => {
         player.keys[name].pressed = event.type === 'keydown';
     }
     else if (name === 'Space') {
-        if(event.type === 'keydown' && shoot) {
+        if (event.type === 'keydown' && shoot) {
             if (!shootingSound.paused) {
                 shootingSound.currentTime = 0;
             }
-            shootingSound.play();
+            if (!isPaused) { shootingSound.play(); }
             backgroundSound.play(); //temp
             projectiles.push(logicHandler.generateProjectile(player, PROJECTILE_SPEED));
             shoot = false;
@@ -70,7 +118,7 @@ const keyEvent = (event) => {
         else if (event.type === 'keyup') {
             shoot = true;
         }
-        
+
     }
 };
 const newGame = (event) => {
@@ -136,13 +184,14 @@ function buildGame() {
         SPEED,
         FRICTION,
         ctx
-    ); 
+    );
     playersScore = new Score(
         { x: canvas.width, y: 0 },
         { x: -100, y: 50 },
         ctx
     );
     gameOverDisplay = new GameOver({ x: canvas.width, y: canvas.height }, null, ctx);
+
 
     window.addEventListener('keydown', keyEvent);
     window.addEventListener('keyup', keyEvent);
@@ -197,7 +246,7 @@ function animate() {
         }
         const crash = logicHandler.testTriangleCollision(asteroid, player?.getVertices());
         if (crash) {
-            if(!explosionSound.paused){
+            if (!explosionSound.paused) {
                 explosionSound.currentTime = 0;
             }
             explosionSound.play();
@@ -234,7 +283,12 @@ function animate() {
     else {
         gameOverDisplay.update();
     }
-    animationID = window.requestAnimationFrame(animate);
+
+    if (isPaused) {
+        cancelAnimationFrame(animationID);
+    } else {
+        animationID = window.requestAnimationFrame(animate);
+    }
 }
 buildGame();
 
