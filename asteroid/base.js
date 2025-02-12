@@ -28,7 +28,7 @@ let playersScore;
 let gameRunning;
 let shipExplodeInterval;
 let gameOverDisplay;
-let isPaused = false;
+let gameIsNotPaused = true;
 
 const explosionSound = document.createElement('audio');
 explosionSound.src = './Audio/explosionSound.mp3';
@@ -44,6 +44,7 @@ backgroundSound.volume = 0.3;
 backgroundSound.loop = true;
 
 const settingsButton = document.querySelector('#settings-button');
+const closeFormButton = document.querySelector('#close-form');
 const settingsForm = document.querySelector('#settings');
 const backgroundVolume = document.querySelector('#background-volume');
 const blasterVolume = document.querySelector('#blaster-volume');
@@ -64,25 +65,14 @@ document.querySelector('#test-explosion').addEventListener('click', () => {
     explosionSound.play();
 });
 
-settingsButton.addEventListener('click', () => {
-    if (settingsForm.classList.contains('show')) {
-        settingsForm.classList.remove('show');
-        isPaused = false;
-        animate()
-    } else {
-        settingsForm.classList.add('show');
-        isPaused = true;
-        requestAnimationFrame(displayPause);
+closeFormButton.addEventListener('click', handlesettingsForm);
+settingsButton.addEventListener('click', handlesettingsForm);
+settingsButton.addEventListener('keydown', (event) => {
+    if (event.code === "Space" || event.code === "Enter") {
+        event.preventDefault();
     }
 });
 
-
-function displayPause() {
-    if (isPaused) {
-        pauseGameDisplay.draw();
-        requestAnimationFrame(displayPause);
-    }
-}
 
 
 backgroundVolume.addEventListener('input', () => backgroundSound.volume = parseFloat(backgroundVolume.value));
@@ -110,9 +100,11 @@ const keyEvent = (event) => {
             if (!shootingSound.paused) {
                 shootingSound.currentTime = 0;
             }
-            if (!isPaused) { shootingSound.play(); }
+            if (gameRunning && gameIsNotPaused) {
+                 shootingSound.play(); 
+                projectiles.push(logicHandler.generateProjectile(player, PROJECTILE_SPEED));
+                }
             backgroundSound.play(); //temp
-            projectiles.push(logicHandler.generateProjectile(player, PROJECTILE_SPEED));
             shoot = false;
         }
         else if (event.type === 'keyup') {
@@ -126,16 +118,27 @@ const newGame = (event) => {
         clearAndResetGame();
 };
 
+function handlesettingsForm(e) {
+    e.preventDefault();
+    if (settingsForm.classList.contains('show')) {
+        settingsForm.classList.remove('show');
+        gameIsNotPaused = true;
+    } else {
+        settingsForm.classList.add('show');
+        gameIsNotPaused = false;
+    }
+}
+
 function handleAsteroid() {
     intervalID = window.setInterval(() => {
         asteroids.push(logicHandler.generateAsteroid());
     }, 3000);
-};
+}
 
 function handleSparks(x, y, radius, lifespan, alpha, amount) {
     const sparkArray = logicHandler.generateSparks(x, y, radius, lifespan, alpha, amount);
     sparkArray.forEach(spark => sparks.push(spark));
-};
+}
 
 function handleAsteroidSplit(asteroid) {
     let flag = false;
@@ -220,28 +223,28 @@ function gameOver() {
     window.removeEventListener('keydown', keyEvent);
     window.removeEventListener('keyup', keyEvent);
     window.addEventListener('keydown', newGame);
+    gameOverDisplay.update();
     if (!shipExplodeInterval)
         shipExplodeInterval = setInterval(() => handleSparks(player.position.x, player.position.y, 1, 75, 1, 10), 100);
 }
 
 function animate() {
-
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    point = 0;
     stars?.forEach(star => star.draw());
-    player?.update(gameRunning);
+    point = 0;
+    player?.update(gameIsNotPaused, gameRunning);
 
     for (let i = projectiles?.length - 1; i >= 0; i--) {
         const projectile = projectiles[i];
-        if (projectile.update()) {
+        if (projectile.update(gameIsNotPaused)) {
             projectiles.splice(i, 1);
         }
     }
 
     for (let i = asteroids?.length - 1; i >= 0; i--) {
         const asteroid = asteroids[i];
-        if (asteroid.update() && asteroid.remove) {
+        if (asteroid.update(gameIsNotPaused) && asteroid.remove) {
             asteroids.splice(i, 1);
         }
         const crash = logicHandler.testTriangleCollision(asteroid, player?.getVertices());
@@ -272,7 +275,7 @@ function animate() {
     }
 
     sparks?.forEach((spark, index) => {
-        if (spark.update()) {
+        if (spark.update(gameIsNotPaused)) {
             sparks.splice(index, 1);
         }
     });
@@ -283,12 +286,11 @@ function animate() {
     else {
         gameOverDisplay.update();
     }
-
-    if (isPaused) {
-        cancelAnimationFrame(animationID);
-    } else {
-        animationID = window.requestAnimationFrame(animate);
+    if (!gameIsNotPaused) {
+        pauseGameDisplay.draw();
     }
+    animationID = window.requestAnimationFrame(animate);
+
 }
 buildGame();
 

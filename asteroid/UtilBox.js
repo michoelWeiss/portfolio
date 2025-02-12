@@ -21,9 +21,11 @@ class Shape {
         }
         return oldPosition.x !== tempPosition.x || oldPosition.y !== tempPosition.y;
     }
-    update() {
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
+    update(gameRunning = true) {
+        if (gameRunning) {
+            this.position.x += this.velocity.x;
+            this.position.y += this.velocity.y;
+        }
         const offScreen = this.isOffScreen();
         this.draw(this.position, this.color, this.ctx, this.radius);
         return offScreen;
@@ -78,8 +80,9 @@ export class Player extends Shape {
         this.speed = speed;
         this.friction = friction;
     }
-    update(gameRunning) {
-        if (gameRunning) {
+    update(gameIsNotPaused, gameRunning) {
+        let update = gameIsNotPaused === true && gameRunning === true;
+        if (update) {
             if (this.keys.ArrowRight.pressed) this.rotation += this.rotationSpeed;
             if (this.keys.ArrowLeft.pressed) this.rotation -= this.rotationSpeed;
 
@@ -93,18 +96,20 @@ export class Player extends Shape {
             }
         }
         else {
-            this.decelerate();
+            this.decelerate(gameIsNotPaused);
         }
         if (!this.keys.ArrowUp.pressed && !this.keys.ArrowDown.pressed) {
             if (this.velocity.x || this.velocity.y) {
-                this.decelerate();
+                this.decelerate(gameIsNotPaused);
             }
         }
-        super.update();
+        super.update(gameIsNotPaused);
     }
-    decelerate() {
-        this.velocity.x *= this.friction;
-        this.velocity.y *= this.friction;
+    decelerate(gameIsNotPaused) {
+        if(gameIsNotPaused){
+            this.velocity.x *= this.friction;
+            this.velocity.y *= this.friction;
+        }
     }
     updateWindowHeight(length, height) {
         super.updateWindowHeight(length, height);
@@ -139,8 +144,8 @@ export class Projectile extends Shape {
                 ctx.fill();
             }, ctx, false);
     }
-    update() {
-        return super.update();
+    update(gameRunning) {
+        return super.update(gameRunning);
     }
     updateWindowHeight(length, height) {
         super.updateWindowHeight(length, height);
@@ -169,8 +174,8 @@ export class Asteroid extends Shape {
                 ctx.stroke();
             }, ctx, true);
     }
-    update() {
-        return super.update();
+    update(gameRunning) {
+        return super.update(gameRunning);
     }
     updateWindowHeight(length, height) {
         super.updateWindowHeight(length, height);
@@ -196,10 +201,12 @@ export class Spark extends Shape {
     isDead() {
         return this.lifespan <= 0 || this.alpha <= 0;
     }
-    update() {
-        super.update();
-        this.alpha -= 0.02;
-        this.lifespan -= 2;
+    update(gameRunning) {
+        super.update(gameRunning);
+        if (gameRunning) {
+            this.alpha -= 0.01;
+            this.lifespan -= 1;
+        }
         return this.isDead();
     }
     updateWindowHeight(length, height) {
@@ -318,7 +325,7 @@ export class Star {
         this.ctx.fillStyle = this.color;
         this.ctx.fill();
     }
-    
+
 }
 
 
