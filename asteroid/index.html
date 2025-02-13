@@ -13,6 +13,16 @@
 
         }
 
+        #controls-button {
+            position: fixed;
+            top: 10px;
+            left: 90px;
+            background: rgba(255, 254, 254, 0.671);
+            border-radius: 10px;
+            font-size: 15px;
+            z-index: 1000;
+        }
+
         #settings-button {
             position: fixed;
             top: 10px;
@@ -23,39 +33,123 @@
             z-index: 1000;
         }
 
-        #settings-button:hover {
+        #settings-button:hover,
+        #controls-button:hover {
             background: rgb(255, 254, 254);
             cursor: pointer;
         }
 
-        #settings {
-            position: fixed;
+         #settings {
             display: none;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgb(255, 254, 254);
-            color: rgb(39, 39, 39);
-            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 30px;
             border-radius: 10px;
-            z-index: 1000;
+            text-align: left;
+            font-size: 18px;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
+            border: 2px solid white;
+            max-width: 400px;
+            z-index: 9999;
+        }
+
+        #settings h3 {
+            color: #00ffff;
+            margin-bottom: 15px;
             text-align: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
 
         #settings label {
             display: block;
+            margin: 10px 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #settings input[type="range"] {
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        #settings button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #00ffff;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #settings button:hover {
+            background-color: #00cccc;
+        }
+
+        #close-form {
+            display: block;
+            margin: 20px auto 0 auto;
+            background-color: #ffcc00;
+            color: #000;
+        }
+
+        #close-form:hover {
+            background-color: #e6b800;
         }
 
         .show {
             display: block !important;
-            ;
         }
+
 
         #background-volume,
         #blaster-volume,
         #explosion-volume {
             cursor: pointer;
+        }
+
+        #controls {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            display: block;
+            color: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 18px;
+            box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
+            border: 2px solid white;
+            max-width: 400px;
+            z-index: 9999;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #controlsText {
+            line-height: 1.6;
+            font-family: Arial, sans-serif;
+        }
+
+        #controls strong {
+            color: #00ffff;
+        }
+
+        #controls::after {
+            content: "Press any key to Play!";
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #ffcc00;
         }
     </style>
 </head>
@@ -63,10 +157,11 @@
 <body>
     <canvas id="theCanvas"></canvas>
     <button id="settings-button">Settings</button>
+    <button id="controls-button">Controls</button>
     <div id="settings">
         <form>
             <h3>Sound Settings</h3>
-             <label for="blaster-volume">Blaster
+            <label for="blaster-volume">Blaster
                 <input type="range" id="blaster-volume" min="0" max="1" step="0.01">
                 <button id="test-blaster">Test Sound</button>
             </label>
@@ -79,6 +174,20 @@
             </label>
             <button id="close-form">Close</button>
         </form>
+    </div>
+
+    <div id="controls">
+        <p id="controlsText">
+            <strong>Game Controls:</strong><br>
+            - Use <strong>Arrow Keys</strong> to move your spaceship:<br>
+            &nbsp;&nbsp;⬆ Up - Move forward<br>
+            &nbsp;&nbsp;⬇ Down - Move backward<br>
+            &nbsp;&nbsp;⬅ Left - Rotate left<br>
+            &nbsp;&nbsp;➡ Right - Rotate right<br>
+            - Press <strong>Spacebar</strong> to shoot.<br>
+            - Release <strong>Spacebar</strong> to stop shooting.<br>
+            - Avoid asteroids and survive as long as possible!
+        </p>
     </div>
     <script src="base.js" type="module"></script>
 </body>

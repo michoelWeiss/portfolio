@@ -297,7 +297,7 @@ export class GameOver {
 
 export class PauseMessage {
     constructor(size, ctx) {
-        this.position = { x: size.x / 2, y: size.y * 0.25 };
+        this.position = { x: size.x / 2, y: size.y * 0.15 };
         this.ctx = ctx;
     }
     draw() {
@@ -309,7 +309,7 @@ export class PauseMessage {
 
     }
     updatePosition(size) {
-        this.position = { x: size.x / 2, y: size.y / 2 };
+        this.position = { x: size.x / 2, y: size.y * 0.15 };
     }
 }
 export class Star {

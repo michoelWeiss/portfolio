@@ -44,12 +44,15 @@ backgroundSound.volume = 0.3;
 backgroundSound.loop = true;
 
 const settingsButton = document.querySelector('#settings-button');
+const controlsButton = document.querySelector('#controls-button');
 const closeFormButton = document.querySelector('#close-form');
 const settingsForm = document.querySelector('#settings');
+const controlsForm = document.querySelector('#controls');
 const backgroundVolume = document.querySelector('#background-volume');
 const blasterVolume = document.querySelector('#blaster-volume');
 const explosionVolume = document.querySelector('#explosion-volume');
 
+document.addEventListener('keydown', startGame);
 document.querySelector('#test-blaster').addEventListener('click', () => {
     event.preventDefault();
     if (!shootingSound.paused) {
@@ -67,7 +70,13 @@ document.querySelector('#test-explosion').addEventListener('click', () => {
 
 closeFormButton.addEventListener('click', handlesettingsForm);
 settingsButton.addEventListener('click', handlesettingsForm);
+controlsButton.addEventListener('click', handlecontrolForm);
 settingsButton.addEventListener('keydown', (event) => {
+    if (event.code === "Space" || event.code === "Enter") {
+        event.preventDefault();
+    }
+});
+controlsButton.addEventListener('keydown', (event) => {
     if (event.code === "Space" || event.code === "Enter") {
         event.preventDefault();
     }
@@ -89,6 +98,8 @@ window.addEventListener('resize', () => {
     player?.updateWindowHeight(canvas.width, canvas.height);
     gameOverDisplay?.updatePosition({ x: canvas.width, y: canvas.height });
     pauseGameDisplay?.updatePosition({ x: canvas.width, y: canvas.height });
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    stars?.forEach(star => star.draw());
 });
 const keyEvent = (event) => {
     const name = event.code;
@@ -101,10 +112,9 @@ const keyEvent = (event) => {
                 shootingSound.currentTime = 0;
             }
             if (gameRunning && gameIsNotPaused) {
-                 shootingSound.play(); 
+                shootingSound.play();
                 projectiles.push(logicHandler.generateProjectile(player, PROJECTILE_SPEED));
-                }
-            backgroundSound.play(); //temp
+            }
             shoot = false;
         }
         else if (event.type === 'keyup') {
@@ -122,10 +132,33 @@ function handlesettingsForm(e) {
     e.preventDefault();
     if (settingsForm.classList.contains('show')) {
         settingsForm.classList.remove('show');
-        gameIsNotPaused = true;
+        if (controlsForm.classList.contains('hidden')) {
+            gameIsNotPaused = true;
+        }
     } else {
         settingsForm.classList.add('show');
+        if (!controlsForm.classList.contains('hidden')){
+            controlsForm.classList.add('hidden');
+        }
         gameIsNotPaused = false;
+    }
+}
+
+function handlecontrolForm(e) {
+    e.preventDefault();
+    if (controlsForm.classList.contains('hidden')) {
+        controlsForm.classList.remove('hidden');   
+        window.addEventListener('keydown', handlecontrolForm);
+        gameIsNotPaused = false;
+        if (settingsForm.classList.contains('show')){
+            settingsForm.classList.remove('show');
+        }
+    } else {
+        controlsForm.classList.add('hidden');  
+        window.removeEventListener('keydown', handlecontrolForm);
+        if (!settingsForm.classList.contains('show'))
+            gameIsNotPaused = true;
+
     }
 }
 
@@ -173,7 +206,6 @@ function buildGame() {
     projectiles = [];
     asteroids = [];
     sparks = [];
-    stars = [];
 
     point = 0;
     shoot = true;
@@ -202,7 +234,7 @@ function buildGame() {
 
     animate();
     handleAsteroid();
-    handleStars(300);
+
 }
 function clearAndResetGame() {
 
@@ -292,9 +324,16 @@ function animate() {
     animationID = window.requestAnimationFrame(animate);
 
 }
-buildGame();
-
-
+function startGame() {
+    document.removeEventListener('keydown', startGame);
+    backgroundSound.play();
+    controlsForm.classList.add('hidden');
+    buildGame();
+}
+ctx.fillStyle = 'black';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+handleStars();
+stars?.forEach(star => star.draw());
 
 
 
