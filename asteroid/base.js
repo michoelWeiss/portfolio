@@ -222,7 +222,7 @@ function buildGame() {
     );
     playersScore = new Score(
         { x: canvas.width, y: 0 },
-        { x: -100, y: 50 },
+        { x: -165, y: 30  },
         ctx
     );
     gameOverDisplay = new GameOver({ x: canvas.width, y: canvas.height }, null, ctx);
