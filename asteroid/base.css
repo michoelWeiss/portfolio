@@ -1,3 +1,169 @@
-#theCanvas{
-    
-}
+ body {
+     margin: 0;
+     overflow: hidden;
+
+ }
+
+ #home {
+     position: fixed;
+     top: 10px;
+     right: 10px;
+     background-color: #01438a;
+     color: rgba(255, 255, 255, 0.89);
+     border: none;
+     padding: 7px 10px;
+     border-radius: 8px;
+     font-size: 16px;
+     font-weight: bold;
+     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+     cursor: pointer;
+     transition: background-color 0.3s ease, transform 0.2s ease;
+     z-index: 1000;
+ }
+
+ #home:hover {
+     transform: scale(1.04);
+ }
+
+ a {
+     text-decoration: none;
+ }
+
+ #controls-button {
+     position: fixed;
+     top: 10px;
+     left: 90px;
+     background: rgba(255, 254, 254, 0.671);
+     border-radius: 10px;
+     font-size: 15px;
+     z-index: 1000;
+ }
+
+ #settings-button {
+     position: fixed;
+     top: 10px;
+     left: 10px;
+     background: rgba(255, 254, 254, 0.671);
+     border-radius: 10px;
+     font-size: 15px;
+     z-index: 1000;
+ }
+
+ #settings-button:hover,
+ #controls-button:hover {
+     background: rgb(255, 254, 254);
+     cursor: pointer;
+ }
+
+ #settings {
+     display: none;
+     position: fixed;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     background-color: rgba(0, 0, 0, 0.8);
+     color: white;
+     padding: 20px 30px;
+     border-radius: 10px;
+     text-align: left;
+     font-size: 18px;
+     box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
+     border: 2px solid white;
+     max-width: 400px;
+     z-index: 9999;
+ }
+
+ #settings h3 {
+     color: #00ffff;
+     margin-bottom: 15px;
+     text-align: center;
+ }
+
+ #settings label {
+     display: block;
+     margin: 10px 0;
+     font-family: Arial, sans-serif;
+ }
+
+ #settings input[type="range"] {
+     width: 100%;
+     margin-top: 5px;
+ }
+
+ #settings button {
+     margin-top: 10px;
+     padding: 5px 10px;
+     background-color: #00ffff;
+     border: none;
+     border-radius: 5px;
+     color: #000;
+     font-weight: bold;
+     cursor: pointer;
+ }
+
+ #settings button:hover {
+     background-color: #00cccc;
+ }
+
+ #close-form {
+     display: block;
+     margin: 20px auto 0 auto;
+     background-color: #ffcc00;
+     color: #000;
+ }
+
+ #close-form:hover {
+     background-color: #e6b800;
+ }
+
+ .show {
+     display: block !important;
+ }
+
+
+ #background-volume,
+ #blaster-volume,
+ #explosion-volume {
+     cursor: pointer;
+ }
+
+ #controls {
+     position: fixed;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     background-color: rgba(0, 0, 0, 0.8);
+     display: block;
+     color: white;
+     padding: 20px 30px;
+     border-radius: 10px;
+     text-align: left;
+     font-size: 18px;
+     box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
+     border: 2px solid white;
+     max-width: 400px;
+     z-index: 9999;
+ }
+
+ .hidden {
+     display: none !important;
+ }
+
+ #controlsText {
+     line-height: 1.6;
+     font-family: Arial, sans-serif;
+ }
+
+ #controls strong {
+     color: #00ffff;
+ }
+
+ #controls::after {
+     content: "Press any key to Play!";
+     display: block;
+     text-align: center;
+     margin-top: 15px;
+     font-weight: bold;
+     font-size: 16px;
+     color: #ffcc00;
+ }
