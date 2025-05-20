@@ -2,9 +2,9 @@
     <p>Email Verification Link has been sent, click on the link to compleate verifiction</p>
 
     <p>If you havent reseved the link click on this button to resend
-    <form action="/sendVerificationLink" method="post"> <button>Resend</button></form>
+    <form action="/Chatters/auth/sendVerificationLink" method="post"> <button>Resend</button></form>
     </p>
     <p>Once Verifies click here to log in
-    <form action="/Sign_In" method="post"> <button>Sign In</button></form>
+    <form action="/Chatters/auth/Sign_In" method="post"> <button>Sign In</button></form>
     </p>
 </div>

@@ -1,0 +1,152 @@
+#header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: all 0.4s ease;
+}
+
+#header ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2em;
+}
+
+#header li {
+    margin: 0;
+    white-space: nowrap;
+    border-bottom: 2px solid rgba(255, 255, 0, 0);
+}
+
+#header a {
+    text-decoration: none;
+    font-weight: 300;
+    color: #000000;
+    border-bottom: 2px solid transparent;
+    padding: .25rem .25rem .375rem;
+    font-size: 1.125rem;
+    letter-spacing: .03em;
+    transition: border .15s linear, color .15s linear;
+}
+
+#header li:hover {
+    cursor: pointer;
+    border-bottom: 2px solid yellow;
+    transform: scale(1.05);
+}
+
+#header.scrolled {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    background-color: rgb(252, 252, 255);
+    height: 3.5em;
+}
+
+footer {
+    position: relative;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #333;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.footer-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.footer-container p {
+    font-size: 1.2em;
+    margin: 0;
+}
+
+.contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 15px;
+}
+
+.contact-list a {
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    display: inline-block;
+    transition: color 0.3s, transform 0.2s;
+}
+
+.contact-list a:hover {
+    cursor: pointer;
+    color: #1e90ff;
+    transform: scale(1.1);
+}
+
+.contact-list li::after {
+    content: "|";
+    margin-left: 10px;
+    color: white;
+}
+
+.contact-list li:last-child::after {
+    content: "";
+}
+
+
+@media (max-width: 768px) {
+    #header {
+        padding-top: 1em;
+        padding-bottom: 0.75em;
+        min-height: 4em;
+        height: auto;
+        transition: all 0.4s ease;
+    }
+
+    #header.scrolled {
+        padding-top: 0.75em;
+        padding-bottom: 0.5em;
+    }
+
+    #header ul {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    #header ul li {
+        margin: 1%;
+    }
+
+    #header a {
+        color: rgba(43, 43, 43, 0.945);
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .contact-list {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-left: 10px;
+    }
+
+    .contact-list li {
+        flex: 0 0 15%;
+        display: inline-block;
+        white-space: nowrap;
+        text-align: center;
+    }
+}

@@ -1,6 +1,6 @@
 
 <div class="form-container">
-    <form id="form" method="POST" action="/Forgot_Username">
+    <form id="form" method="POST" action="/Chatters/auth/Forgot_Username">
         <div id="emailContainer">
             <label for="email">
                 <h3>Email Address</h3>

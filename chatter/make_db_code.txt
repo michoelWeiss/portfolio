@@ -13,13 +13,142 @@ CREATE TABLE IF NOT EXISTS users (
     PRIMARY KEY (email, exit_date)
 );
 
-CREATE TABLE tokens (
+CREATE TABLE IF NOT EXISTS tokens (
   id INT,
   verification_token VARCHAR(64),
   token_expires_at DATETIME,
   PRIMARY KEY (id, verification_token, token_expires_at),
   FOREIGN KEY (id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS chats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    creator INT NOT NULL,
+    FOREIGN KEY (creator) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS chat_members (
+    chat_id INT NOT NULL,
+    user_id INT NOT NULL,
+    join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    exit_date DATE DEFAULT '9999-12-31',
+    PRIMARY KEY (chat_id, user_id),
+    FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS chat_administrators (
+    chat_id INT NOT NULL,
+    user_id INT NOT NULL,
+    date_appointed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    current_admin BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (chat_id, user_id),
+    FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    chat_id INT NOT NULL,
+    sender_id INT NOT NULL,
+    date_sent TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    message TEXT,
+    FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+ADDED DATABASE
+INSERT INTO users (username, display_name, password, email, security_question, join_date, exit_date, email_verified)
+VALUES 
+('jdoe', 'John Doe', 'hashed_password_1', 'jdoe@example.com', 'hashed_answer_1', '2023-01-15', '9999-12-31', TRUE),
+('asmith', 'Alice Smith', 'hashed_password_2', 'asmith@example.com', 'hashed_answer_2', '2022-06-20', '9999-12-31', TRUE),
+('bwayne', 'Bruce Wayne', 'hashed_password_3', 'bwayne@wayneenterprises.com', 'hashed_answer_3', '2024-03-01', '9999-12-31', TRUE),
+('ckent', 'Clark Kent', 'hashed_password_4', 'ckent@dailyplanet.com', 'hashed_answer_4', '2021-09-10', '9999-12-31', FALSE),
+('dprince', 'Diana Prince', 'hashed_password_5', 'dprince@themyscira.org', 'hashed_answer_5', '2023-11-11', '9999-12-31', TRUE);
+
+INSERT INTO chats (name, creator)
+VALUES
+('General Chat', 43),
+('Web Dev Talk', 44),
+('DC Heroes Hangout', 41),
+('Journalism Circle', 45),
+('Amazon Island Group', 46);
+
+INSERT INTO chat_administrators (chat_id, user_id)
+VALUES
+(1, 39),
+(2, 38),
+(3, 39),
+(4, 38),
+(5, 39);
+
+INSERT INTO chat_members (chat_id, user_id)
+VALUES
+-- Chat 1 (Members: 38, 39, 41, 42, 43, 44, 45)
+(1, 39),
+(1, 38),
+(1, 41),
+(1, 42),
+(1, 43),
+(1, 44),
+(1, 45),
+
+-- Chat 2 (Members: 38, 41, 46)
+(2, 38),
+(2, 41),
+(2, 46),
+
+-- Chat 3 (Members: 39, 43, 44, 45, 46)
+(3, 39),
+(3, 43),
+(3, 44),
+(3, 45),
+(3, 46),
+
+-- Chat 4 (Members: 38, 42, 44)
+(4, 38),
+(4, 42),
+(4, 44),
+
+-- Chat 5 (Members: 39, 41, 42, 43, 46)
+(5, 39),
+(5, 41),
+(5, 42),
+(5, 43),
+(5, 46);
+
+INSERT INTO chat_messages (chat_id, sender_id, date_sent, message)
+VALUES
+-- Chat 1 (Members: 38, 39, 41, 42, 43, 44, 45)
+(1, 39, '2024-12-01 09:15:00', 'Good morning everyone! Kicking off the week strong.'),
+(1, 43, '2024-12-01 09:17:00', 'Morning! Got some code I want to share later.'),
+(1, 41, '2024-12-01 10:20:00', 'Same here, just fixed a CSS bug.'),
+(1, 38, '2024-12-01 11:05:00', 'Sweet, drop them in when you’re ready.'),
+
+-- Chat 2 (Members: 38, 41, 46)
+(2, 38, '2024-11-28 08:40:00', 'Here’s the article I mentioned.'),
+(2, 41, '2024-11-28 09:02:00', 'Thanks! I’ll give it a read today.'),
+(2, 46, '2024-11-28 10:15:00', 'Nice find. Loved the second half.'),
+
+-- Chat 3 (Members: 39, 43, 44, 45, 46)
+(3, 39, '2024-12-02 14:00:00', 'Anyone deploying this week?'),
+(3, 43, '2024-12-02 14:20:00', 'Trying to. Still debugging a merge conflict.'),
+(3, 45, '2024-12-02 15:05:00', 'I can help if you want to pair up.'),
+(3, 44, '2024-12-02 16:10:00', 'Jumping in after my meeting.'),
+
+-- Chat 4 (Members: 38, 42, 44)
+(4, 38, '2024-11-29 12:00:00', 'Anyone tried the new design system?'),
+(4, 42, '2024-11-29 12:20:00', 'Yes! It’s much more accessible.'),
+(4, 44, '2024-11-29 13:30:00', 'Agreed, especially the form inputs.'),
+
+-- Chat 5 (Members: 39, 41, 42, 43, 46)
+(5, 39, '2024-12-03 08:00:00', 'Let’s plan a meetup next month.'),
+(5, 46, '2024-12-03 08:35:00', 'Sounds good. Prefer weekends.'),
+(5, 41, '2024-12-03 09:10:00', 'Count me in. NYC again?'),
+(5, 43, '2024-12-03 10:15:00', 'I’ll check venues and report back.');
+
 
 // database info 
 Host: sql5.freesqldatabase.com

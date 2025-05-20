@@ -3,10 +3,10 @@ import express from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
-import indexRouter from './routes/index.js';
-import usersRouter from './routes/users.js'; 
+import chatters_auth from './routes/chatters_auth.js';
+import usersRouter from './routes/users.js';
 import session from 'express-session';
-
+import { getPool, recreatePool } from './pool.js';
 
 
 var app = express();
@@ -27,16 +27,47 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
-app.use('/', indexRouter);
+
+app.use((req, res, next)=>{
+  if(!req.pool){
+    req.recreatePool = recreatePool;
+    req.pool = getPool;
+  }
+  next();
+});
+app.get('/', (req, res, next) => {
+  res.sendFile(path.join(__dirname, 'public', 'html/index.html'));
+});
+app.use('/Asteroid', (req, res, next) => {
+  res.sendFile(path.join(__dirname, 'public', 'html/asteroid.html'));
+});
+app.use('/Bubbles', (req, res, next) => {
+  res.sendFile(path.join(__dirname, 'public', 'html/bubbles.html'));
+});
+
+app.get('/Chatters', (req, res, next) => {
+  res.render('layout', {
+    title: 'Home',
+    display_backLink: false,
+    partials: {
+      content: 'home_chatting'
+    }
+  });
+});
+
+app.use('/Chatters/auth', chatters_auth);
+
+
+
 app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};

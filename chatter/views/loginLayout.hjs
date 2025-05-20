@@ -13,9 +13,9 @@
 <body>
   <script src="/javascripts/jquery-3.7.1.min.js"></script>
   <div class="link_container">
-    <a href="/log_out" class="links">Log Out</a>
+    <a href="/Chatters/auth/log_out" class="links">Log Out</a>
     {{#display_backLink}}
-    <a href="/Sign_In" class="links">Back</a>
+    <a href="/Chatters/auth/Sign_In" class="links">Back</a>
     {{/display_backLink}}
   </div>
 

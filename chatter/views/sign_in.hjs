@@ -1,6 +1,6 @@
  <div class="form-container">
     <div class="form-wrapper">
-        <form id="form" method="POST" action="/Sign_In">
+        <form id="form" method="POST" action="/Chatters/auth/Sign_In">
             <div>
                 <label for="username">
                     <h3>Username</h3>
@@ -25,9 +25,9 @@
             <button id="submitButt" type="submit">Log In</button>
         </form>
         <div id="forgot_credentials">
-            <a href="/Forgot_Username">Forgot Username</a>
-            <a href="/Forgot_Password">Forgot Password</a>
-            <a href="/Forgot_User_and_Password">Forgot Both Username and Password</a>
+            <a href="/Chatters/auth/Forgot_Username">Forgot Username</a>
+            <a href="/Chatters/auth/Forgot_Password">Forgot Password</a>
+            <a href="/Chatters/auth/Forgot_User_and_Password">Forgot Both Username and Password</a>
         </div>
     </div>
 </div>
