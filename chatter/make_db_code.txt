@@ -59,7 +59,16 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-ADDED DATABASE
+CREATE TABLE IF NOT EXISTS read_messages (
+    chat_id INT NOT NULL,
+    user_id INT NOT NULL,
+    new_message BOOLEAN DEFAULT FALSE,
+     PRIMARY KEY (chat_id, user_id),
+    FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+ADDED DATA
 INSERT INTO users (username, display_name, password, email, security_question, join_date, exit_date, email_verified)
 VALUES 
 ('jdoe', 'John Doe', 'hashed_password_1', 'jdoe@example.com', 'hashed_answer_1', '2023-01-15', '9999-12-31', TRUE),
@@ -149,6 +158,35 @@ VALUES
 (5, 41, '2024-12-03 09:10:00', 'Count me in. NYC again?'),
 (5, 43, '2024-12-03 10:15:00', 'I’ll check venues and report back.');
 
+INSERT INTO read_messages (chat_id, user_id, new_message)
+VALUES 
+(1, 43, TRUE),
+(1, 44, TRUE),
+(1, 41, TRUE),
+(1, 45, TRUE),
+(1, 42, TRUE),
+(1, 39, TRUE),
+(1, 38, TRUE),
+
+(2, 41, TRUE),
+(2, 46, TRUE),
+(2, 38, TRUE),
+
+(3, 43, TRUE),
+(3, 45, TRUE),
+(3, 44, TRUE),
+(3, 46, TRUE),
+(3, 39, TRUE),
+
+(4, 44, TRUE),
+(4, 42, TRUE),
+(4, 38, TRUE),
+
+(5, 41, TRUE),
+(5, 42, TRUE),
+(5, 43, TRUE),
+(5, 46, TRUE),
+(5, 39, TRUE);
 
 // database info 
 Host: sql5.freesqldatabase.com

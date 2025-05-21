@@ -35,20 +35,6 @@ const verifyHash = async (input, hashedPassword) => {
 const make_token = () => {
   return crypto.randomBytes(32).toString('hex');
 };
-const run_sqlPool = async (req, sql, params, retries = 3, delayMs = 500) => {
-  try {
-    const [results] = await req.pool().execute(sql, params);
-    return results;
-  } catch (err) {
-    if (err.code === 'ECONNRESET' && retries > 0) {
-      console.warn(`ECONNRESET encountered, reconnection and retrying... (${retries} retries left)`);
-      req.recreatePool();
-      await new Promise(res => setTimeout(res, delayMs));
-      return run_sqlPool(req, sql, params, retries - 1, delayMs);
-    }
-    throw err;
-  }
-};
 const Sign_in = async (req, res, next) => {
   try {
     const searchParam = req.body.searchParam;
@@ -63,7 +49,7 @@ const Sign_in = async (req, res, next) => {
 
     if (searchKey && searchValue && verifyKey && verifyValue) {
       const sql = `SELECT id, username, display_name, email, email_verified, ${verifyKey} FROM users WHERE ${searchKey} = ? AND exit_date > CURRENT_DATE`;
-      const results = await run_sqlPool(req, sql, [searchValue]);
+      const results = await  req.pool(sql, [searchValue]);
       if (!results.length) {
         throw Object.assign(new Error('Could not find a match to this Username'), { statusCode: 404 });
       }
@@ -112,12 +98,12 @@ const handle_tokens = async (req, res, next) => {
   if (id && token) {
     try {
       const sql = 'DELETE FROM tokens WHERE id = ?';
-      const results = await run_sqlPool(req, sql, [id]);
+      const results = await req.pool(sql, [id]);
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 10);
       const expiresAtFormatted = expiresAt.toISOString();
       const tokenSQL = 'INSERT INTO tokens (id, verification_token, token_expires_at) VALUES (?, ?, ?)';
-      const tokenInsert = await run_sqlPool(req, tokenSQL, [id, token, expiresAtFormatted]);
+      const tokenInsert = await req.pool(tokenSQL, [id, token, expiresAtFormatted]);
       if (!tokenInsert.affectedRows)
         throw new Error('Error making verification token');
       next();
@@ -206,7 +192,7 @@ router.route('/Sign_Up')
       try {
         const { username, email } = req.sanitizedData;
         const sql = 'SELECT username, email FROM users WHERE (email = ? AND exit_date > CURRENT_DATE) OR (username = ? AND exit_date > CURRENT_DATE)';
-        const results = await run_sqlPool(req, sql, [email, username]);
+        const results = await req.pool(sql, [email, username]);
         if (results.length) {
           const message = results[0].email === email ?
             `${email} is already in use, please select a new Email, if this is your Account click Sign In.` : `${username} is already in use, please select a new UserName`;
@@ -222,7 +208,7 @@ router.route('/Sign_Up')
       try {
         const { username, displayName, password, email, securityQ } = req.sanitizedData;
         const sql = 'INSERT INTO users (username, display_name, password, email, security_question, join_date, exit_date, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-        const result = await run_sqlPool(req, sql, [username, displayName, password, email, securityQ, new Date(), new Date('9999-12-31'), 0]);
+        const result = await req.pool(sql, [username, displayName, password, email, securityQ, new Date(), new Date('9999-12-31'), 0]);
         if (!result.affectedRows) {
           throw Object.assign(new Error('There was an error submitting your data, please try again.'), { statusCode: 500 });
         }
@@ -316,15 +302,15 @@ router.get('/verify-email', async (req, res, next) => {
     if (!token || !id)
       throw new Error('Invalid Credentials')
     const sql = `SELECT id FROM tokens WHERE id = ? AND verification_token = ? AND token_expires_at > CURRENT_TIMESTAMP`;
-    const results = await run_sqlPool(req, sql, [id, token]);
+    const results = await req.pool(sql, [id, token]);
     if (results.length > 0) {
       // Token is valid, proceed with updating the user's email_verified
       console.log(results)
       const updateSQL = `UPDATE users SET email_verified = 1 WHERE id = ? AND exit_date > CURRENT_DATE`
-      await run_sqlPool(req, updateSQL, [id]);
+      await req.pool(updateSQL, [id]);
       // Delete the token from the tokens table
       const deleteSQL = `DELETE FROM tokens WHERE id = ? AND verification_token = ?`
-      await run_sqlPool(req, deleteSQL, [id, token]);
+      await req.pool(deleteSQL, [id, token]);
       res.end();
     }
     else {
@@ -399,7 +385,7 @@ router.route('/Forgot_Password')
         throw new Error('Please insert valid search params');
       }
       const sql = `SELECT id FROM users WHERE email = ? AND username = ? AND exit_date > CURRENT_DATE`;
-      const results = await run_sqlPool(req, sql, [email, username]);
+      const results = await req.pool(sql, [email, username]);
       if (!results.length) {
         throw new Error('Could not find a match');
       }
@@ -478,7 +464,7 @@ router.route('/update-password')
         throw new Error('Invalid Credentials')
 
       const sql = `SELECT id FROM tokens WHERE id = ? AND verification_token = ? AND token_expires_at > CURRENT_TIMESTAMP`;
-      const results = await run_sqlPool(req, sql, [id, token]);
+      const results = await req.pool(sql, [id, token]);
 
       if (results.length > 0) {
         res.render('layout', {
@@ -512,7 +498,7 @@ router.route('/update-password')
         throw new Error('Invalid Credentials')
 
       const sql = `SELECT id FROM tokens WHERE id = ? AND verification_token = ? AND token_expires_at > CURRENT_TIMESTAMP`;
-      const results = await run_sqlPool(req, sql, [id, token]);
+      const results = await req.pool(sql, [id, token]);
 
       if (results.length > 0) {
         if (password !== passwordConfirm) {
@@ -531,9 +517,9 @@ router.route('/update-password')
         });
 
         const updateSQL = `UPDATE users SET password = ? WHERE id = ? AND exit_date > CURRENT_DATE`;
-        await run_sqlPool(req, updateSQL, [password, id]);
+        await req.pool(updateSQL, [password, id]);
         const deleteSQL = `DELETE FROM tokens WHERE id = ? AND verification_token = ?`;
-        await run_sqlPool(req, deleteSQL, [id, token]);
+        await req.pool(deleteSQL, [id, token]);
         return res.redirect('/Chatters/auth/Sign_In');
       }
       else {

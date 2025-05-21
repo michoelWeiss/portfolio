@@ -4,9 +4,9 @@ import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
 import chatters_auth from './routes/chatters_auth.js';
-import usersRouter from './routes/users.js';
+import chatsRouter from './routes/chats.js';
 import session from 'express-session';
-import { getPool, recreatePool } from './pool.js';
+import run_sqlPool from './pool.js';
 
 
 var app = express();
@@ -30,8 +30,7 @@ app.use(session({
 
 app.use((req, res, next)=>{
   if(!req.pool){
-    req.recreatePool = recreatePool;
-    req.pool = getPool;
+    req.pool = run_sqlPool();
   }
   next();
 });
@@ -56,10 +55,7 @@ app.get('/Chatters', (req, res, next) => {
 });
 
 app.use('/Chatters/auth', chatters_auth);
-
-
-
-app.use('/users', usersRouter);
+app.use('/Chatters/chats', chatsRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

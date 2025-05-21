@@ -28,13 +28,21 @@ function createPool() {
     });
   return pool;
 }
+ export default function run_sqlPool() {
+  return async (sql, params, retries = 3, delayMs = 500) => {
+     try {
+    const [results] = await pool.execute(sql, params);
+    return results;
+  } catch (err) {
+    if (err.code === 'ECONNRESET' && retries > 0) {
+      console.warn(`ECONNRESET encountered, reconnection and retrying... (${retries} retries left)`);
+     createPool();
+      await new Promise(res => setTimeout(res, delayMs));
+      return run_sqlPool(req, sql, params, retries - 1, delayMs);
+    }
+    throw err;
+  }
+  };
+}
+
 createPool();
-
-export function getPool() {
-  return pool;
-}
-
-export function recreatePool() {
-  console.warn('♻️ Recreating MySQL pool due to connection error...');
-  return createPool();
-}
