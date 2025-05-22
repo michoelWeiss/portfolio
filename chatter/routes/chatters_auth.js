@@ -54,11 +54,11 @@ const Sign_in = async (req, res, next) => {
         throw Object.assign(new Error('Could not find a match to this Username'), { statusCode: 404 });
       }
       const user = results[0];
-      if (verifyHash(verifyValue, user[verifyKey])) {
+      if (await verifyHash(verifyValue, user[verifyKey])) {
         user[verifyKey] = '';
       }
       else {
-        throw Object.assign(new Error('Verification key is incorrect'), { statusCode: 401 });
+        throw Object.assign(new Error('Verification key is incorrect'), { statusCode: 401 }); 
       }
 
       if (user.email_verified !== 1) {
@@ -66,7 +66,7 @@ const Sign_in = async (req, res, next) => {
           id: user.id,
           address: user.email
         };
-        return res.redirect(307, '/Chatters/auth/sendVerificationLink');
+        return res.redirect(307, '/Chatters/auth/sendVerificationLink'); 
       }
       req.session.loggedIn = user;
     }
@@ -158,7 +158,6 @@ router.route('/Sign_Up')
   })
   .post(async (req, res, next) => {
     try {
-      console.log(process.env.SQL_HOST, process.env.SQL_USER, process.env.SQL_PASSWORD, process.env.SQL_DATABASE);
       const tests = testsPage();
       let { username, displayName, password, passwordConfirm, email, securityQ } = req.body;
       let testUsername = tests.testLength(username) && tests.hasUpper(username) && tests.hasLower(username) && tests.hasNoSpaces(username);

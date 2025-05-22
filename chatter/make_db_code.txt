@@ -68,6 +68,16 @@ CREATE TABLE IF NOT EXISTS read_messages (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS message_user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message TEXT,
+    date_sent TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
 ADDED DATA
 INSERT INTO users (username, display_name, password, email, security_question, join_date, exit_date, email_verified)
 VALUES 
