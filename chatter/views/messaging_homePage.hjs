@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Chats</title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+  
+  <div class="link_container">
+    <a href="/Chatters" class="links">Home</a>
+     <a href="/Chatters/chats/log_out" class="links">Log Out</a>
+  </div>
+
+  <header>
+    <h2>Chats</h2>
+  </header>
+
+ 
+
+<script src="/javascripts/jquery-3.7.1.min.js"></script>
+</body>
+</html>

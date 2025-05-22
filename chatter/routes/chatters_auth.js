@@ -49,7 +49,7 @@ const Sign_in = async (req, res, next) => {
 
     if (searchKey && searchValue && verifyKey && verifyValue) {
       const sql = `SELECT id, username, display_name, email, email_verified, ${verifyKey} FROM users WHERE ${searchKey} = ? AND exit_date > CURRENT_DATE`;
-      const results = await  req.pool(sql, [searchValue]);
+      const results = await req.pool(sql, [searchValue]);
       if (!results.length) {
         throw Object.assign(new Error('Could not find a match to this Username'), { statusCode: 404 });
       }
@@ -81,13 +81,14 @@ const Sign_in = async (req, res, next) => {
 };
 const log_in = (req, res, next) => {
   if (req.session.loggedIn) {
-    res.render('loginLayout', {
-      title: 'Logged In',
-      display_backLink: false,
-      partials: {
-        content: 'logged_In'
-      }
-    });
+    res.redirect('/Chatters/chats');
+    //   res.render('loginLayout', {
+    //    title: 'Logged In',
+    //    display_backLink: false,
+    //    partials: {
+    //      content: 'logged_In'
+    //     }
+    //   });
   }
   else {
     return res.redirect('/Chatters/auth/Sign_In');
@@ -228,7 +229,7 @@ router.route('/Sign_Up')
 router.route('/Sign_In')
   .get((req, res, next) => {
     if (req.session.loggedIn) {
-      res.redirect('/Chatters/auth/log_in');
+      next();
     }
     else {
       res.render('layout', {
@@ -239,7 +240,8 @@ router.route('/Sign_In')
         }
       });
     }
-  })
+  },
+    log_in)
   .post(async (req, res, next) => {
 
     const { username, password } = req.body;
@@ -331,7 +333,7 @@ router.get('/verify-email', async (req, res, next) => {
 router.route('/Forgot_Username')
   .get((req, res, next) => {
     if (req.session.loggedIn) {
-      res.redirect('/Chatters/auth/log_in');
+      next();
     }
     else {
       res.render('layout', {
@@ -342,7 +344,9 @@ router.route('/Forgot_Username')
         }
       });
     }
-  })
+  },
+    log_in
+  )
   .post((req, res, next) => {
     const { email, password } = req.body;
     try {
@@ -366,7 +370,7 @@ router.route('/Forgot_Username')
 router.route('/Forgot_Password')
   .get((req, res, next) => {
     if (req.session.loggedIn) {
-      res.redirect('/Chatters/auth/log_in');
+      next();
     }
     else {
       res.render('layout', {
@@ -377,7 +381,9 @@ router.route('/Forgot_Password')
         }
       });
     }
-  })
+  },
+    log_in
+  )
   .post(async (req, res, next) => {
     const { email, username } = req.body;
     try {
@@ -424,7 +430,7 @@ router.route('/Forgot_Password')
 router.route('/Forgot_User_and_Password')
   .get((req, res, next) => {
     if (req.session.loggedIn) {
-      res.redirect('/Chatters/auth/log_in');
+      next();
     }
     else {
       res.render('layout', {
@@ -435,7 +441,9 @@ router.route('/Forgot_User_and_Password')
         }
       });
     }
-  })
+  },
+    log_in
+  )
   .post((req, res, next) => {
     const { email, securityQ } = req.body;
     try {
@@ -534,8 +542,5 @@ router.route('/update-password')
     }
   });
 
-router.get('/log_out', (req, res, next) => {
-  req.session.destroy(() => res.redirect('/Chatters'));
-});
 
 export default router

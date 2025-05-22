@@ -33,7 +33,6 @@ WHERE cm.user_id = ? AND cm.exit_date > CURRENT_DATE
 ORDER BY c.id, m.date_sent;
 `;
     const results = await req.pool(sql, [id]);
-    //console.log(results);
     return results;
   }
   catch (err) {
@@ -44,18 +43,38 @@ ORDER BY c.id, m.date_sent;
 
 router.get('/', async function (req, res, next) {
   try {
-    const results = await load_chats_and_messages(req, 39);
-    if (results) {
+    if (req.session.loggedIn) {
+      const user = req.session.loggedIn;
+      if (!user.id) {
+        throw new Error("missing valid ID")
+      }
+      const results = await load_chats_and_messages(req, user.id);
       let chats = [];
-      results.forEach(message => {
-        if (message.chat_id && !chats.some(chat => chat.chat_id === message.chat_id)) {
-          const { chat_id, chat_name, new_messages, admin_id, admin_display_name } = message;
-          chats.push({ chat_id, chat_name, new_messages, admin_id, admin_display_name });
-        }
+      if (results) {
+        results.forEach(messageTemp => {
+          if (messageTemp && messageTemp.chat_id) {
+            const { chat_id, chat_name, new_messages, admin_id, admin_display_name, message_id, sender_id, sender_display_name, message, date_sent } = messageTemp;
+            let existingChat = chats.find(c => c.chat_id === messageTemp.chat_id);
+            if (existingChat) {
+              existingChat.message.push({ message_id, sender_id, sender_display_name, message, date_sent });
+            }
+            else {
+              chats.push({ chat_id, chat_name, new_messages, admin_id, admin_display_name, message: [{ message_id, sender_id, sender_display_name, message, date_sent }] });
+            }
+
+          }
+        });
+      }
+       res.render('messaging_homePage', {
+        title: 'Sign In',
+        chats
       });
-      console.log(chats);
+      res.send(chats);
+      console.log(user)
     }
-    res.send('respond with a resource');
+    else{
+      res.redirect('/Chatters/auth/Sign_In');
+    }
   }
   catch (err) {
 
@@ -63,4 +82,7 @@ router.get('/', async function (req, res, next) {
 
 });
 
+router.get('/log_out', (req, res, next) => {
+  req.session.destroy(() => res.redirect('/Chatters'));
+});
 export default router
