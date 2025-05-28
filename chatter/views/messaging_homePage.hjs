@@ -12,44 +12,28 @@
 
   <div class="link_container">
     <a href="/Chatters" class="links">Home</a>
-    <a href="/Chatters/chats/log_out" class="links">Log Out</a>
+    <a href="/Chatters/chats/log_out" class="links">Log Out</a> 
   </div>
 
   <header>
     <h2>Chats</h2>
   </header>
 
-  <div class="chat_list">
-    {{#chats}}
-    {{#new_messages}}
-    <div id="chat-{{chat_id}}" class="chat new_message"></div>
-    {{/new_messages}}
-    {{^new_messages}}
-    <div id="chat-{{chat_id}}" class="chat"></div>
-    {{/new_messages}}
-
-    <h2>{{chat_name}}</h2>
-    <div id="message-{{message_id}}" class="message">
-      <h3>{{sender_display_name}}</h3>
-      <h4>{{message}}</h4>
-      <h6>{{date_sent}}</h6>
-    </div>
-  </div>
-  {{/chats}}
+  <div id="chat_list">
   </div>
 
-
-
-
-
-  <div class="message_Page">
-    <div class="message">
-
-    </div>
+  <div id="message_Page">
+    <div id="chat_Info"></div>
+    <div id="message_Container"></div>
+    <form>
+      <input id="message_input" type="text">
+      <button id="submit_button" type="button">Submit</button>
+      </form>
   </div>
 
 
   <script src="/javascripts/jquery-3.7.1.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/javascripts/messaging_homePage.js"></script>
 </body>
 

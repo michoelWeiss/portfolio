@@ -1,8 +1,9 @@
 import express from 'express';
 var router = express.Router();
 
+let pool;
 /* GET users listing. */
-const load_chats = async (req, id) => {
+const load_chats = async (id) => {
   try {
     const sql = `
 SELECT
@@ -35,7 +36,7 @@ LEFT JOIN users u ON m.sender_id = u.id
 WHERE cm.user_id = ? AND cm.exit_date > CURRENT_DATE
 ORDER BY m.date_sent DESC;
     `;
-    const results = await req.pool(sql, [id]);
+    const results = await pool(sql, [id]);
     return results;
   }
   catch (err) {
@@ -44,7 +45,7 @@ ORDER BY m.date_sent DESC;
 
 };
 
-const load_messages = async (req, user_id, chat_id) => {
+const load_messages = async (user_id, chat_id) => {
   try {
     const sql_chatInfo = `SELECT
   c.id AS chat_id,
@@ -63,7 +64,7 @@ LEFT JOIN chat_administrators a
 
 WHERE cm.user_id = ? AND cm.chat_id = ? AND cm.exit_date > CURRENT_DATE
 `;
-    const chatInfo_results = await req.pool(sql_chatInfo, [user_id, chat_id]);
+    const chatInfo_results = await pool(sql_chatInfo, [user_id, chat_id]);
 
     if (!chatInfo_results.length) {
       throw new Error('Could not find valid chatroom')
@@ -83,9 +84,9 @@ LEFT JOIN users sender ON m.sender_id = sender.id
 WHERE cm.user_id = ? AND cm.chat_id = ? AND cm.exit_date > CURRENT_DATE
 ORDER BY m.date_sent DESC;
 `;
-    const messages_results = await req.pool(sql_messages, [user_id, chat_id]);
+    const messages_results = await pool(sql_messages, [user_id, chat_id]);
 
-    const results = {chat: chatInfo_results[0], messages: messages_results};
+    const results = { chat: chatInfo_results[0], messages: messages_results }; 
     return results;
   }
   catch (err) {
@@ -94,26 +95,59 @@ ORDER BY m.date_sent DESC;
 
 };
 
+function setupChatSockets(io) {
+  io.on('connection', (socket) => {
+    const session = socket.handshake.session;
+    const user = session.loggedIn;
+
+    if (!user || !user.id) {
+      console.log("Unauthenticated socket connection");
+      socket.disconnect();
+      return;
+    }
+    console.log(`User ${user.id} connected via socket`);
+    socket.emit('connection_successfull', user);
+
+    socket.on('get_chatList', async (callback) => {
+      const chats = await load_chats(user.id);
+      callback(chats)
+    });
+
+   socket.on('get_messagePage', async ({chat_id}, callback) => {
+    if(chat_id){
+      const result = await load_messages(user.id, chat_id);
+      callback(result)
+    }
+    });
+
+     socket.on('submit_message', async ({chat_id, message}) => {
+    if(chat_id && message){
+      console.log(chat_id, message)
+    }
+    });
+  });
+}
+router.use((req, res, next) => {
+  if (!pool) {
+    pool = req.pool;
+  }
+  next();
+})
 router.get('/', async function (req, res, next) {
   try {
-     if (req.session.loggedIn){
+    if (req.session.loggedIn) {
       const user = req.session.loggedIn;
       if (!user.id) {
-        throw new Error("missing valid ID")
+        throw new Error("missing valid ID")   
       }
-      
-      const chats = await load_chats(req, 39);
-      console.log(user, chats);
-
-       res.render('messaging_homePage', {
-        title: 'Sign In',
-        chats
+      res.render('messaging_homePage', {
+        title: 'Chats'
       });
-     }
-      else{
-      res.redirect('/Chatters/auth/Sign_In');  
     }
-  
+    else {
+      res.redirect('/Chatters/auth/Sign_In');
+    }
+
   } catch (err) {
     next(err); // Pass error to global error handler
   }
@@ -121,7 +155,7 @@ router.get('/', async function (req, res, next) {
 
 
 router.get('/log_out', (req, res, next) => {
-  req.session.destroy(() => res.redirect('/Chatters')); 
+  req.session.destroy(() => res.redirect('/Chatters'));
 });
 
 // Global error handler
@@ -131,4 +165,4 @@ router.use((err, req, res, next) => {
 });
 
 
-export default router
+export { router as default, setupChatSockets };
