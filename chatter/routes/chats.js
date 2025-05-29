@@ -2,6 +2,8 @@ import express from 'express';
 var router = express.Router();
 
 let pool;
+let chat_ServerList = {};
+
 /* GET users listing. */
 const load_chats = async (id) => {
   try {
@@ -86,7 +88,7 @@ ORDER BY m.date_sent DESC;
 `;
     const messages_results = await pool(sql_messages, [user_id, chat_id]);
 
-    const results = { chat: chatInfo_results[0], messages: messages_results }; 
+    const results = { chat: chatInfo_results[0], messages: messages_results };
     return results;
   }
   catch (err) {
@@ -95,6 +97,45 @@ ORDER BY m.date_sent DESC;
 
 };
 
+const upload_message = async (user_id, chat_id, message) => {
+  try {
+    if (!user_id && !chat_id && !message) { throw new Error('Invalid Data') }
+    const add_messageSQL = `
+    INSERT INTO chat_messages (chat_id, sender_id, message)
+    VALUES (?,?,?)
+    `;
+    const add_messageResults = await pool(add_messageSQL, [chat_id, user_id, message]);
+    if (add_messageResults.affectedRows) {
+      const newId = add_messageResults.insertId;
+      const update_readMessagesSQL = `
+    UPDATE read_messages SET new_message = 1 WHERE chat_id = ?;
+    `;
+      await pool(update_readMessagesSQL, [chat_id]);
+      if (!newId) { throw new Error('Cant retrieve new Message') }
+
+      const get_messageSQL = `SELECT
+      cm.id AS message_id,
+      cm.chat_id,
+      cm.date_sent,
+      cm.message,
+      c.name AS chat_name,
+      sender.display_name AS sender_name
+      FROM chat_messages cm
+      LEFT JOIN chats c ON cm.chat_id = c.id
+      LEFT JOIN users sender ON cm.sender_id = sender.id
+      WHERE cm.id = ?
+      `;
+      const newMessage = await pool(get_messageSQL, [newId]);
+      const new_message = newMessage[0];
+      if (new_message)
+        return new_message;
+      else { return; }
+    }
+  }
+  catch (err) {
+    throw err;
+  }
+};
 function setupChatSockets(io) {
   io.on('connection', (socket) => {
     const session = socket.handshake.session;
@@ -110,21 +151,45 @@ function setupChatSockets(io) {
 
     socket.on('get_chatList', async (callback) => {
       const chats = await load_chats(user.id);
-      callback(chats)
+      if (chats.length) {
+        chats.forEach(chat => {
+          if (chat_ServerList[chat.chat_id]) {
+            chat_ServerList[chat.chat_id].push({ user_id: user.id, socket });
+          }
+          else {
+            chat_ServerList[chat.chat_id] = [{ user_id: user.id, socket }];
+          }
+        });
+        callback(chats)
+      }
     });
 
-   socket.on('get_messagePage', async ({chat_id}, callback) => {
-    if(chat_id){
-      const result = await load_messages(user.id, chat_id);
-      callback(result)
-    }
+    socket.on('get_messagePage', async ({ chat_id }, callback) => {
+      if (chat_id) {
+        const result = await load_messages(user.id, chat_id);
+        callback(result)
+      }
     });
 
-     socket.on('submit_message', async ({chat_id, message}) => {
-    if(chat_id && message){
-      console.log(chat_id, message)
-    }
+    socket.on('submit_message', async ({ chat_id, message }) => {
+      if (chat_id && message) {
+        const new_message = await upload_message(user.id, chat_id, message);
+
+        if (new_message && chat_ServerList[new_message.chat_id]) {
+          chat_ServerList[new_message.chat_id].forEach(({ socket }) => {
+            socket.emit('new_message', new_message);
+          });
+        }
+      }
     });
+
+    socket.on('opened_chat', async (chat_id) => {
+      if (chat_id) {
+        const update_readMessages = `UPDATE read_messages SET new_message = 0 WHERE chat_id = ? AND user_id = ?`;
+        await pool(update_readMessages, [chat_id, user.id])
+      }
+    });
+
   });
 }
 router.use((req, res, next) => {
@@ -138,7 +203,7 @@ router.get('/', async function (req, res, next) {
     if (req.session.loggedIn) {
       const user = req.session.loggedIn;
       if (!user.id) {
-        throw new Error("missing valid ID")   
+        throw new Error("missing valid ID")
       }
       res.render('messaging_homePage', {
         title: 'Chats'
