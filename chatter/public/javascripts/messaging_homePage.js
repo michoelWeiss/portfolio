@@ -6,34 +6,48 @@ const message_Container = $('#message_Container');
 const message_input = $('#message_input');
 const submit_button = $('#submit_button');
 
+const join_chats_Container = $('#join_chats_Container');
+const join_chats_LastButt = $('#join_chats_LastButt');
+const join_chats_NextButtut = $('#join_chats_NextButt');
+const join_chats_input = $('#join_chats_input');
+const join_chats_submit_button = $('#join_chats_submit_button');
+
 let userInfo;
 let chatList = {};
+let first;
+let last;
 
 submit_button.click(submit_message);
+join_chats_NextButtut.click(() => {
+    last = last || 0;
+    const offset = last;
+    socket.emit('scroll_joinChats', { offset, direction: 'next' });
+});
+join_chats_LastButt.click(() => {
+    if (first > 1) {
+        const offset = first - 4; // 3 is the amount im scrolling and 1 because the offset is exclusive 
+        socket.emit('scroll_joinChats', { offset, direction: 'last' });
+    }
+    else {
+        //add effect 
+    }
+});
 
-socket.on('connection_successfull', (user) => {
+socket.on('connection_successfull', ({ user, joinChatList }) => {
     userInfo = user;
-    console.log(userInfo);
+    if (joinChatList.length) {
+        first = 1;
+        last = joinChatList.length; console.log(last);
+        joinChatList.forEach(chat => {
+            add_join_chatBox(chat);
+        });
+    }
     socket.emit('get_chatList', setUp_chat_list);
 })
-function get_messagePage(chat_id) {
-    if (chat_id) {
-        socket.emit('get_messagePage', { chat_id }, load_Message_Container);
-    }
-}
-function submit_message(event) {
-    event.preventDefault();
-    const message = message_input.val().trim();
-    const chat_id = parseInt(chat_Info.attr('data-chat-id'));
-    if (!message || isNaN(chat_id)) return;
-
-    socket.emit('submit_message', { chat_id, message });
-    message_input.val('');
-}
 
 socket.on('new_message', (new_message) => {
-    const messageBox = $(`<div id="message"></div>`);
-    const sender_name = $(`<h3>${new_message.sender_name}</h3>`);
+    const messageBox = $(`<div class="message"></div>`);
+    const sender_name = $(`<h5>${new_message.sender_name}</h5>`);
     const message = $(`<h4>${new_message.message}</h4>`);
     const date = $(`<h6>${new_message.date_sent}</h6>`);
 
@@ -43,14 +57,14 @@ socket.on('new_message', (new_message) => {
 
     let current_chat;
     if (chatList[new_message.chat_id]) {
-        current_chat = chatList[new_message.chat_id];
+        current_chat = $(chatList[new_message.chat_id]);
         if (!current_chat.hasClass('new_message')) {
             current_chat.addClass('new_message');
         }
-    }
-    const messageDiv = current_chat.find('div#message');
-    if (messageDiv.length) {
-        messageDiv.remove();
+        const messageDiv = current_chat.find('div.message');
+        if (messageDiv.length) {
+            messageDiv.remove();
+        }
     }
     else {
         current_chat = $(`<div id="chat_container" class="chat new_message"></div>`);
@@ -58,15 +72,73 @@ socket.on('new_message', (new_message) => {
         current_chat.append(chat_name);
         chatList[new_message.chat_id] = current_chat;
     }
+    console.log(current_chat, messageBox);
     current_chat.append(messageBox);
     chat_list.prepend(current_chat);
 
     const currentChat_InChatPage = parseInt(chat_Info.attr('data-chat-id'));
     if (currentChat_InChatPage === new_message.chat_id) {
         current_chat.removeClass('new_message');
-        message_Container.append(messageBox);
+        socket.emit('opened_chat', new_message.chat_id);
+        message_Container.append(messageBox.clone());
     }
 })
+
+socket.on('new_scroll_chats', ({ results, direction }) => {
+    if (results) {
+        for (let i = 0; i < results.length; i++) {
+            if (direction === 'next') {
+                join_chats_Container.find('div').first().remove();
+                first++;
+                last++;
+                add_join_chatBox(results[i], direction)
+            }
+            else if (direction === 'last') {
+                join_chats_Container.find('div').last().remove();
+                first--;
+                last--;
+                add_join_chatBox(results[results.length - 1 - i], direction)
+            }
+        }
+    }
+})
+
+function add_join_chatBox(chat, direction) {
+    const chatBox = $(`<div class="join_chatBox"></div>`);
+    const name = $(`<h4>${chat.chat_name}</h4>`);
+    const members = $(`<h6>${chat.active_members} members</h6>`);
+
+    chatBox.click(() => reqToJoinChat(chat.chat_id));
+    chatBox.append(name);
+    chatBox.append(members);
+    if (direction === 'last') {
+        join_chats_Container.prepend(chatBox);
+    }
+    else { join_chats_Container.append(chatBox); }
+}
+
+function reqToJoinChat(chatId) {
+    console.log('sending req , ', chatId)
+}
+function get_messagePage(chat_id) {
+    if (chat_id) {
+        socket.emit('get_messagePage', { chat_id }, load_Message_Container);
+        socket.emit('opened_chat', chat_id);
+        if (chatList[chat_id].hasClass('new_message')) {
+            chatList[chat_id].removeClass('new_message');
+        }
+    }
+}
+
+function submit_message(event) {
+    event.preventDefault();
+    const message = message_input.val().trim();
+    const chat_id = parseInt(chat_Info.attr('data-chat-id'));
+    if (!message || isNaN(chat_id)) return;
+
+    socket.emit('submit_message', { chat_id, message });
+    message_input.val('');
+}
 
 function setUp_chat_list(chats) {
     chats.forEach(chat => {
@@ -79,7 +151,7 @@ function setUp_chat_list(chats) {
                 current_chat = $(`<div id="chat_container" class="chat"></div>`);
             }
             const chat_name = $(`<h2>${chat.chat_name}</h2>`);
-            const message_container = $(`<div id="message"></div>`);
+            const message_container = $(`<div class="message"></div>`);
             const sender_name = $(`<h3>${chat.sender_display_name}</h3>`);
             const message = $(`<h4>${chat.message}</h4>`);
             const date = $(`<h6>${chat.date_sent}</h6>`);

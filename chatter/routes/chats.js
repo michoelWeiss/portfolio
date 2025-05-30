@@ -5,7 +5,7 @@ let pool;
 let chat_ServerList = {};
 
 /* GET users listing. */
-const load_chats = async (id) => {
+const load_user_chats = async (id) => {
   try {
     const sql = `
 SELECT
@@ -136,8 +136,32 @@ const upload_message = async (user_id, chat_id, message) => {
     throw err;
   }
 };
+const get_joinable_chats = async (offset) => {
+  try {
+    const limit = 3;
+    if (offset - limit < 0) offset = 0; console.log('offset ', offset)
+    const sql = `SELECT 
+    c.id AS chat_id,
+    c.name AS chat_name,
+    COUNT(cm.user_id) AS active_members
+
+    FROM chats c
+    LEFT JOIN chat_members cm 
+    ON cm.chat_id = c.id 
+    AND cm.exit_date > CURRENT_DATE
+    GROUP BY c.id, c.name
+    ORDER BY c.name ASC
+    LIMIT ? OFFSET ?;
+      `;
+    return await pool(sql, [limit, offset]); 
+
+  }
+  catch (err) {
+    return [];
+  }
+};
 function setupChatSockets(io) {
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     const session = socket.handshake.session;
     const user = session.loggedIn;
 
@@ -147,10 +171,17 @@ function setupChatSockets(io) {
       return;
     }
     console.log(`User ${user.id} connected via socket`);
-    socket.emit('connection_successfull', user);
+    const joinChatList = await get_joinable_chats(0)
+    socket.emit('connection_successfull', { user, joinChatList });
+
+    socket.on('scroll_joinChats', async ({ offset, direction }) => {
+      const results = await get_joinable_chats(offset);
+      console.log(results)
+      socket.emit('new_scroll_chats', { results, direction })
+    });
 
     socket.on('get_chatList', async (callback) => {
-      const chats = await load_chats(user.id);
+      const chats = await load_user_chats(user.id);
       if (chats.length) {
         chats.forEach(chat => {
           if (chat_ServerList[chat.chat_id]) {
@@ -186,7 +217,7 @@ function setupChatSockets(io) {
     socket.on('opened_chat', async (chat_id) => {
       if (chat_id) {
         const update_readMessages = `UPDATE read_messages SET new_message = 0 WHERE chat_id = ? AND user_id = ?`;
-        await pool(update_readMessages, [chat_id, user.id])
+        await pool(update_readMessages, [chat_id, user.id]);
       }
     });
 

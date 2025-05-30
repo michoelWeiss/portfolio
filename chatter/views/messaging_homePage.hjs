@@ -31,6 +31,16 @@
       </form>
   </div>
 
+  <div id="join_chats_page">
+    <h3>Join Chats</h3>
+     <form>
+      <input id="join_chats_input" type="text">
+      <button id="join_chats_submit_button" type="button">Search</button>
+      </form>
+    <button id="join_chats_LastButt">&larr; Last</button>
+    <div id="join_chats_Container"></div>
+  <button id="join_chats_NextButt">Next &rarr;</button>
+  </div>
 
   <script src="/javascripts/jquery-3.7.1.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
