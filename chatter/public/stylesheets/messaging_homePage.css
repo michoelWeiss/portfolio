@@ -1,3 +1,246 @@
-.new_message{
-    background-color: red;
+/* General layout */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f9;
+}
+
+.link_container {
+  display: flex;
+  justify-content: space-between;
+  background-color: #34495e;
+  padding: 10px 20px;
+}
+
+.links {
+  color: #ecf0f1;
+  text-decoration: none;
+  margin: 0 10px;
+  font-weight: bold;
+}
+
+.links:hover {
+  text-decoration: underline;
+}
+
+header {
+  text-align: center;
+  background-color: #2c3e50;
+  color: white;
+  padding: 20px 0;
+}
+
+/* Chat list */
+#chat_list {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+
+.chat {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  transition: transform 0.3s ease;
+}
+
+.chat:hover {
+  transform: scale(1.02);
+  cursor: pointer;
+}
+
+.new_message {
+  border-left: 5px solid #3498db;
+  background-color: #eaf6ff;
+}
+
+/* Message page (sliding in from right) */
+#message_Page {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 35%;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+  transition: right 0.5s ease;
+  padding: 20px;
+  z-index: 1000;
+}
+
+#message_Page.active {
+  right: 0;
+}
+
+#chat_Info h1, #chat_Info h3 {
+  margin: 5px 0;
+}
+
+.messageBox, .message {
+  border-bottom: 1px solid #ddd;
+  padding: 10px 0;
+}
+/* Join chats */
+/* Join chats */
+#join_chats_page {
+  margin-top: 40px;
+  padding: 20px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Title styling */
+#join_chats_page h3 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Search input area */
+#join_chats_page form {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+#join_chats_input {
+  padding: 12px 15px;
+  font-size: 1.2rem;
+  width: 300px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#join_chats_submit_button {
+  padding: 12px 20px;
+  margin-left: 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+/* Main row: buttons + chat container */
+#join_chats_main_row {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  gap: 10px;
+}
+
+/* Wrapper around chat container to hide overflow */
+#join_chats_wrapper {
+  overflow: hidden;
+  width: 50%;
+  position: relative;
+}
+
+/* Chat cards row 
+.join_chats_Container {
+  display: flex;
+  gap: 15px;
+  transition: transform 0.5s ease;
+  will-change: transform;
+}
+*/
+/* Chat card styling */
+.join_chatBox {
+  min-width: 200px;
+  background-color: #ecf0f1;
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Hover effect */
+.join_chatBox:hover {
+  transform: translateY(-5px);
+  cursor: pointer;
+}
+
+/* Navigation buttons */
+#join_chats_LastButt,
+#join_chats_NextButt {
+  padding: 0 15px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #dfe6e9;
+  border: none;
+  border-radius: 6px;
+  min-width: 50px;
+}
+
+/* Match height of chat cards */
+#join_chats_LastButt,
+#join_chats_NextButt {
+  height: 100%;
+}
+
+
+
+/* Slide animation buttons (optional if you want to use animations in JS too) */
+.slide-left {
+  animation: slideLeft 0.5s forwards;
+}
+
+.slide-right {
+  animation: slideRight 0.5s forwards;
+}
+
+@keyframes slideLeft {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideRight {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* Close button */
+#message_Page .close_btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 30px;
+} 
+
+#message_input {
+  width: calc(100% - 80px);
+  padding: 10px;
+  margin-right: 10px;
+}
+
+#submit_button {
+  padding: 10px 20px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+} 
+
+#submit_button:hover {
+  background-color: #2980b9;
 }

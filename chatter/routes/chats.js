@@ -5,6 +5,18 @@ let pool;
 let chat_ServerList = {};
 
 /* GET users listing. */
+const get_total_numb_of_chats = async () => {
+  const amountOf_chats = `SELECT 
+    g.total_chats
+    FROM global_stats g
+    WHERE id = 1;
+      `;
+  const total = await pool(amountOf_chats, []);
+  if (total[0]?.total_chats) {
+    return total[0].total_chats;
+  }
+  return null;
+};
 const load_user_chats = async (id) => {
   try {
     const sql = `
@@ -136,10 +148,8 @@ const upload_message = async (user_id, chat_id, message) => {
     throw err;
   }
 };
-const get_joinable_chats = async (offset) => {
+const get_joinable_chats = async (offset, limit = 3) => {
   try {
-    const limit = 3;
-    if (offset - limit < 0) offset = 0; console.log('offset ', offset)
     const sql = `SELECT 
     c.id AS chat_id,
     c.name AS chat_name,
@@ -153,7 +163,8 @@ const get_joinable_chats = async (offset) => {
     ORDER BY c.name ASC
     LIMIT ? OFFSET ?;
       `;
-    return await pool(sql, [limit, offset]); 
+    console.log(offset)
+    return await pool(sql, [limit, offset]);
 
   }
   catch (err) {
@@ -171,27 +182,86 @@ function setupChatSockets(io) {
       return;
     }
     console.log(`User ${user.id} connected via socket`);
-    const joinChatList = await get_joinable_chats(0)
-    socket.emit('connection_successfull', { user, joinChatList });
+
+    const total = await get_total_numb_of_chats();
+    const showing = await get_joinable_chats(0);
+    const next = await get_joinable_chats(3);
+    const prev = await get_joinable_chats(total % 3 === 0 ? total - 3 : total - (total % 3));
+    let joinChatList = {};
+    if (showing.length && next.length && prev.length)
+      joinChatList = { showing: { chats: showing, first: 1, last: 3 }, next: { chats: next, first: 4, last: 6 }, prev: { chats: prev, first: total - prev.length + 1, last: total } }
+    socket.emit('connection_successfull', { user, joinChatList, num_of_chats: total });
 
     socket.on('scroll_joinChats', async ({ offset, direction }) => {
-      const results = await get_joinable_chats(offset);
-      console.log(results)
-      socket.emit('new_scroll_chats', { results, direction })
+      const total = await get_total_numb_of_chats();
+      if (total) {
+        let first;
+        let last;
+        let limit = 3;
+        if (direction === 'next') {
+          if (total <= offset) {
+            offset = 0;
+          }
+        }
+        else {
+          if (offset < 0) {
+            limit = total % 3 === 0 ? 3 : total % 3
+            offset = total - limit;
+          }
+        }
+        const results = await get_joinable_chats(offset, limit);
+        if (!results.length) { return; /* handle error */ }
+        first = offset + 1;
+        last = offset + results.length;
+        socket.emit('new_scroll_chats', { results, first, last, direction })
+      }
     });
 
     socket.on('get_chatList', async (callback) => {
       const chats = await load_user_chats(user.id);
       if (chats.length) {
         chats.forEach(chat => {
-          if (chat_ServerList[chat.chat_id]) {
-            chat_ServerList[chat.chat_id].push({ user_id: user.id, socket });
+          if (!chat_ServerList[chat.chat_id]) {
+            chat_ServerList[chat.chat_id] = {};
           }
-          else {
-            chat_ServerList[chat.chat_id] = [{ user_id: user.id, socket }];
+          if (!chat_ServerList[chat.chat_id][user.id]) {
+            chat_ServerList[chat.chat_id][user.id] = socket;
           }
         });
         callback(chats)
+      }
+    });
+
+    socket.on('req_to_join_chat', async (chatId) => {
+      const sql = ` INSERT INTO req_to_join_chat (user_id, chat_id) 
+      VALUES (?,?);
+      `;
+      await pool(sql, [user.id, chatId]);
+
+      const find_AdminSQL = `SELECT 
+      ca.user_id
+      FROM chat_administrators ca
+      WHERE ca.chat_id = ? AND ca.current_admin = TRUE;
+      `;
+      const admin_result = await pool(find_AdminSQL, [chatId]);
+      const admin_id = admin_result?.[0]?.user_id;
+      console.log(chat_ServerList, chat_ServerList[chatId]?.[admin_id]);
+
+      // that chat is live bec if it was empty then the admin of that chat is not active
+      if (admin_id && chat_ServerList[chatId]?.[admin_id]) {
+        const applicant_InfoSQL = `SELECT 
+        u.display_name AS user_display_name
+        FROM users u
+        WHERE id = ? AND ca.current_admin = TRUE;
+        `;
+
+        chat_ServerList[chatId][admin_id].emit('req_to_join_chat', {
+          user_display_name: user.display_name,
+          user_id: user.id,
+          chat_id: chatId
+        });
+      } else {
+        console.log('Admin not connected or chat not live.');
       }
     });
 

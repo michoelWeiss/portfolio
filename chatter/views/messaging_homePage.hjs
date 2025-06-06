@@ -5,6 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Chats</title>
+  <link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
   <link rel='stylesheet' href='/stylesheets/messaging_homePage.css' />
 </head>
 
@@ -12,37 +13,72 @@
 
   <div class="link_container">
     <a href="/Chatters" class="links">Home</a>
-    <a href="/Chatters/chats/log_out" class="links">Log Out</a> 
+    <a href="/Chatters/chats/log_out" class="links">Log Out</a>
   </div>
 
   <header>
     <h2>Chats</h2>
   </header>
 
-  <div id="chat_list">
-  </div>
+  <div id="chat_list"> </div>
+
 
   <div id="message_Page">
+    <button class="close_btn">&times;</button>
     <div id="chat_Info"></div>
     <div id="message_Container"></div>
     <form>
       <input id="message_input" type="text">
       <button id="submit_button" type="button">Submit</button>
-      </form>
+    </form>
   </div>
+
 
   <div id="join_chats_page">
     <h3>Join Chats</h3>
-     <form>
+
+    <form>
       <input id="join_chats_input" type="text">
       <button id="join_chats_submit_button" type="button">Search</button>
-      </form>
-    <button id="join_chats_LastButt">&larr; Last</button>
-    <div id="join_chats_Container"></div>
-  <button id="join_chats_NextButt">Next &rarr;</button>
+    </form>
+
+
+
+
+    <div id="join_chats_main_row" class="carousel slide">
+      <button id="join_chats_LastButt" class="carousel-control-prev" type="button" data-bs-target="#join_chats_main_row" data-bs-slide="prev">
+        <span class="visually-hidden">Previous</span>
+        &larr;
+        </button>
+
+      <div id="join_chats_wrapper" class="carousel-inner">
+
+        <div class="carousel-item join_chats_Container active showing">
+        </div>
+        <div class="carousel-item join_chats_Container next">
+        </div>
+        <div class="carousel-item join_chats_Container prev">
+        </div>
+
+      </div>
+
+      <button id="join_chats_NextButt" class="carousel-control-next" type="button" data-bs-target="#join_chats_main_row" data-bs-slide="next">
+        <span class="visually-hidden">Next</span>
+        &rarr;
+        </button>
+    </div>
+
+
+
+
+
   </div>
 
+
+
+
   <script src="/javascripts/jquery-3.7.1.min.js"></script>
+  <script src="/javascripts/bootstrap.bundle.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/javascripts/messaging_homePage.js"></script>
 </body>

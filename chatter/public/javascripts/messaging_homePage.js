@@ -6,41 +6,63 @@ const message_Container = $('#message_Container');
 const message_input = $('#message_input');
 const submit_button = $('#submit_button');
 
-const join_chats_Container = $('#join_chats_Container');
 const join_chats_LastButt = $('#join_chats_LastButt');
 const join_chats_NextButtut = $('#join_chats_NextButt');
 const join_chats_input = $('#join_chats_input');
 const join_chats_submit_button = $('#join_chats_submit_button');
 
+const scroll_chat_carousel = [{ carousel: $('.prev'), first: null, last: null }, { carousel: $('.showing'), first: null, last: null }, { carousel: $('.next'), first: null, last: null }]
 let userInfo;
 let chatList = {};
-let first;
-let last;
+let scroll_Index = 1;
 
 submit_button.click(submit_message);
+
 join_chats_NextButtut.click(() => {
-    last = last || 0;
-    const offset = last;
+    scroll_Index++;
+    if (scroll_Index > 2) {
+        scroll_Index = 0;
+    }
+    const offset = scroll_chat_carousel[scroll_Index].last;
     socket.emit('scroll_joinChats', { offset, direction: 'next' });
 });
 join_chats_LastButt.click(() => {
-    if (first > 1) {
-        const offset = first - 4; // 3 is the amount im scrolling and 1 because the offset is exclusive 
-        socket.emit('scroll_joinChats', { offset, direction: 'last' });
+    scroll_Index--;
+    if (scroll_Index < 0) {
+        scroll_Index = 2;
     }
-    else {
-        //add effect 
-    }
+    console.log(scroll_chat_carousel[scroll_Index].first)
+    const offset = scroll_chat_carousel[scroll_Index].first - 4;  // 3 is the amount im scrolling and 1 because the offset is exclusive
+    socket.emit('scroll_joinChats', { offset, direction: 'last' });
 });
+
+socket.on('new_scroll_chats', ({ results, first, last, direction }) => {
+    if (results) {
+        let index;
+        if(direction === 'next'){
+            index = scroll_Index + 1 > 2 ? 0: scroll_Index + 1;
+        }
+        else{
+            index = scroll_Index - 1 < 0 ? 2: scroll_Index - 1;
+        }
+        scroll_chat_carousel[index].carousel.empty();
+        updateScroll_First_Last(first, last, scroll_chat_carousel[index]);
+        add_join_chatBox(results, scroll_chat_carousel[index].carousel);
+    }
+})
 
 socket.on('connection_successfull', ({ user, joinChatList }) => {
     userInfo = user;
-    if (joinChatList.length) {
-        first = 1;
-        last = joinChatList.length; console.log(last);
-        joinChatList.forEach(chat => {
-            add_join_chatBox(chat);
-        });
+    console.log(joinChatList);
+    if (joinChatList) {
+        const { next, prev, showing } = joinChatList;
+        updateScroll_First_Last(showing.first, showing.last, scroll_chat_carousel[1]);
+        updateScroll_First_Last(next.first, next.last, scroll_chat_carousel[2]);
+        updateScroll_First_Last(prev.first, prev.last, scroll_chat_carousel[0]);
+        console.log(scroll_chat_carousel);
+        add_join_chatBox(showing.chats, scroll_chat_carousel[1].carousel);
+        add_join_chatBox(next.chats, scroll_chat_carousel[2].carousel);
+        add_join_chatBox(prev.chats, scroll_chat_carousel[0].carousel);
     }
     socket.emit('get_chatList', setUp_chat_list);
 })
@@ -84,41 +106,30 @@ socket.on('new_message', (new_message) => {
     }
 })
 
-socket.on('new_scroll_chats', ({ results, direction }) => {
-    if (results) {
-        for (let i = 0; i < results.length; i++) {
-            if (direction === 'next') {
-                join_chats_Container.find('div').first().remove();
-                first++;
-                last++;
-                add_join_chatBox(results[i], direction)
-            }
-            else if (direction === 'last') {
-                join_chats_Container.find('div').last().remove();
-                first--;
-                last--;
-                add_join_chatBox(results[results.length - 1 - i], direction)
-            }
-        }
-    }
-})
 
-function add_join_chatBox(chat, direction) {
-    const chatBox = $(`<div class="join_chatBox"></div>`);
-    const name = $(`<h4>${chat.chat_name}</h4>`);
-    const members = $(`<h6>${chat.active_members} members</h6>`);
+socket.on('req_to_join_chat', (message) => console.log(message));
 
-    chatBox.click(() => reqToJoinChat(chat.chat_id));
-    chatBox.append(name);
-    chatBox.append(members);
+function add_join_chatBox(chatArray, container, direction) {
+
+    chatArray.forEach(chat => {
+        const chatBox = $(`<div class="join_chatBox"></div>`);
+        const name = $(`<h4>${chat.chat_name}</h4>`);
+        const members = $(`<h6>${chat.active_members} members</h6>`);
+        chatBox.click(() => reqToJoinChat(chat.chat_id));
+        chatBox.append(name);
+        chatBox.append(members);
+        container.append(chatBox)
+    });
+    /*
     if (direction === 'last') {
         join_chats_Container.prepend(chatBox);
     }
     else { join_chats_Container.append(chatBox); }
+    */
 }
 
 function reqToJoinChat(chatId) {
-    console.log('sending req , ', chatId)
+    socket.emit('req_to_join_chat', chatId);
 }
 function get_messagePage(chat_id) {
     if (chat_id) {
@@ -202,6 +213,7 @@ function load_Message_Container(messagePage) {
                     messageBox.append(date);
                     message_Container.append(messageBox);
                 }
+                message_Page.addClass('active');
             }
             else {
                 const messageBox = $(`<div class='messageBox'></div>`);
@@ -213,3 +225,14 @@ function load_Message_Container(messagePage) {
 
     }
 }
+
+function updateScroll_First_Last(first, last, scroll_Object){
+    Object.assign(scroll_Object, { first, last });
+}
+
+
+
+$('#message_Page .close_btn').click(() => {
+    message_Page.removeClass('active'); // Hide message page
+    chat_Info.removeAttr('data-chat-id'); // Optional: clear context
+});
