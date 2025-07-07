@@ -1,0 +1,4 @@
+<div>
+  <p>{{paragraphMessage}}</p>
+  <button onclick="window.location.href='/Chatters/auth/Sign_In';">Sign In</button>
+</div>

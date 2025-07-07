@@ -24,7 +24,23 @@
     <h2>{{ title }}</h2>
   </header>
   {{/title}}
+  {{#contentMessage}}
+  <div class="content-message">
+    {{contentMessage}}
+  </div>
+  {{/contentMessage}}
   {{> content}}
+
+{{#toastMessage}}
+<div id="toast" class="toast {{toastType}}">
+  {{toastMessage}}
+</div>
+<script>
+  $(document).ready(function () {
+    $('#toast').fadeIn(1000).delay(5000).fadeOut(400);
+  });
+</script>
+{{/toastMessage}}
 
 </body>
 

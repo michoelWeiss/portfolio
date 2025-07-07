@@ -42,9 +42,6 @@
       <button id="join_chats_submit_button" type="button">Search</button>
     </form>
 
-
-
-
     <div id="join_chats_main_row" class="carousel slide">
       <button id="join_chats_LastButt" class="carousel-control-prev" type="button" data-bs-target="#join_chats_main_row" data-bs-slide="prev">
         <span class="visually-hidden">Previous</span>
