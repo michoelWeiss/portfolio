@@ -431,6 +431,7 @@ router.route('/Forgot_Password')
       if (!results.length) {
         throw Object.assign(new Error('No user found'), { userMessage: 'No user found' });
       }
+      req.email = {};
       req.email.id = results[0].id;
       req.email.address = email;
       req.email.token = make_token();
@@ -498,7 +499,7 @@ router.route('/Forgot_User_and_Password')
         throw Object.assign(new Error('Missing Credentials'), { userMessage: 'Missing Credentials' });
       }
       req.body.searchParam = { 'email': email };
-      req.body.verifyParam = { 'securityQ': securityQ };
+      req.body.verifyParam = { 'security_question': securityQ };
 
       next();
     }
