@@ -1,46 +1,48 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
   <meta charset="UTF-8">
   <title>{{ title }}</title>
-  <link rel='stylesheet' href='/stylesheets/style.css' />
-  <link rel='stylesheet' href='/stylesheets/forms.css' />
-  <link rel='stylesheet' href='/stylesheets/sign_up.css' />
+  <link rel='stylesheet' href='/stylesheets/base.css' />
+  <script src="/javascripts/jquery-3.7.1.min.js"></script>
 </head>
 
 <body>
-  <script src="/javascripts/jquery-3.7.1.min.js"></script>
-  <div class="link_container">
-    <a href="/Chatters" class="links">Home</a>
-    {{#display_backLink}}
-    <a href="/Chatters/auth/Sign_In" class="links">Back</a>
-    {{/display_backLink}}
-  </div>
+  <div class="page-container">
+    <nav class="link_container">
+      <a href="/Chatters" class="links">Home</a>
+      {{#display_backLink}}
+      <a href="/Chatters/auth/Sign_In" class="links">Sign In</a>
+      {{/display_backLink}}
+    </nav>
 
-  {{#title}}
-  <header>
-    <h2>{{ title }}</h2>
-  </header>
-  {{/title}}
-  {{#contentMessage}}
-  <div class="content-message">
-    {{contentMessage}}
-  </div>
-  {{/contentMessage}}
-  {{> content}}
+    {{#title}}
+    <header>
+      <h2>{{ title }}</h2>
+    </header>
+    {{/title}}
 
-{{#toastMessage}}
-<div id="toast" class="toast {{toastType}}">
-  {{toastMessage}}
-</div>
-<script>
-  $(document).ready(function () {
-    $('#toast').fadeIn(1000).delay(5000).fadeOut(400);
-  });
-</script>
-{{/toastMessage}}
+    {{#contentMessage}}
+    <div class="content-message">
+      {{contentMessage}}
+    </div>
+    {{/contentMessage}}
+
+    <main class="content-wrapper">
+      {{> content}}
+    </main>
+
+    {{#toastMessage}}
+    <div id="toast" class="toast {{toastType}}">
+      {{toastMessage}}
+    </div>
+    <script>
+      $(document).ready(function () {
+        $('#toast').fadeIn(500).delay(3000).fadeOut(500);
+      });
+    </script>
+    {{/toastMessage}}
+  </div>
 
 </body>
 

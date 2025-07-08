@@ -1,0 +1,18 @@
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<div class="homepage-container">
+    {{#display_message}}
+    <p>{{display_message}}</p>
+    {{/display_message}}
+
+    <div class="homepage-buttons">
+        {{#Sign_InButt}}
+        <button onclick="window.location.href = '/Chatters/auth/Sign_In';">Sign In</button>
+        {{/Sign_InButt}}
+        {{#Sign_UpButt}}
+        <button onclick="window.location.href = '/Chatters/auth/Sign_Up';">Sign Up</button>
+        {{/Sign_UpButt}}
+        {{#Verification_LinkButt}}
+        <form action="/Chatters/auth/sendVerificationLink" method="post"> <button>Resend Verification Link</button></form>
+        {{/Verification_LinkButt}}
+    </div>
+</div>

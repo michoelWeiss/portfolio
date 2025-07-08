@@ -1,5 +1,0 @@
-<div>
-    <p>Welcome to the home page</p>
-    <button onclick="window.location.href = '/Chatters/auth/Sign_In';">Sign In</button>
-    <button onclick="window.location.href = '/Chatters/auth/Sign_Up';">Sign Up</button> 
-</div>

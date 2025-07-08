@@ -140,6 +140,7 @@ const send_email = async (req, res, next) => {
 router.route('/Sign_Up')
   .get((req, res, next) => {
     const errorMessage = req.query.error || '';
+    console.log(errorMessage)
     res.render('layout', {
       title: 'Sign Up',
       toastMessage: errorMessage,
@@ -262,27 +263,43 @@ router.route('/Sign_In')
     }
   );
 
-router.post('/sendVerificationLink', async (req, res, next) => {
-  try {
-    if (!req.session.email) {
-      throw Object.assign(new Error('Error sending Verification Link, Please try again.'), { userMessage: 'Error sending Verification Link, Please try again.' });
+router.route('/sendVerificationLink')
+  .get((req, res) => {
+    const successMessage = req.query.success || '';
+    res.render('layout', {
+      title: 'Send Link',
+      toastMessage: successMessage,
+      toastType: successMessage ? 'success' : '',
+      display_message: 'A verification link has been sent to your email—click it to verify; if you didn’t receive it, you can resend it below, then log in once verified.',
+      Sign_InButt: true,
+      Verification_LinkButt: true,
+      partials: {
+        content: 'displayMessage_nav'
+      }
+    });
+
+  })
+  .post(async (req, res, next) => {
+    try {
+      if (!req.session.email) {
+        throw Object.assign(new Error('Error sending Verification Link, Please try again.'), { userMessage: 'Error sending Verification Link, Please try again.' });
+      }
+      const { id, address } = req.session.email;
+      const token = make_token();
+      if (id && address && token) {
+        req.email = { id, address, token };
+        next();
+      }
     }
-    const { id, address } = req.session.email;
-    const token = make_token();
-    if (id && address && token) {
-      req.email = { id, address, token };
-      next();
+    catch (err) {
+      next(err)
     }
-  }
-  catch (err) {
-    next(err)
-  }
-},
-  handle_tokens,
-  (req, res, next) => {
-    const { id, token } = req.email;
-    req.email.subject = 'Verify Email Address';
-    req.email.html = `
+  },
+    handle_tokens,
+    (req, res, next) => {
+      const { id, token } = req.email;
+      req.email.subject = 'Verify Email Address';
+      req.email.html = `
         <div style="font-family: Arial, sans-serif; color: #333;">
           <h2>Hello,</h2>
           <p>Please click the link below to verify your email address:</p>
@@ -294,23 +311,17 @@ router.post('/sendVerificationLink', async (req, res, next) => {
           <p>Thank you,<br>The Chatters Team</p>
         </div>
       `;
-    next();
-  },
-  send_email,
-  (req, res) => {
-    res.render('layout', {
-      title: 'Send Link',
-      partials: {
-        content: 'sendLink'
-      }
+      next();
+    },
+    send_email,
+    (req, res) => {
+      return res.redirect(`/Chatters/auth/sendVerificationLink?success=${encodeURIComponent('Verification Link has been sent.')}`);
+    },
+    (err, req, res, next) => {
+      console.error(err.stack);
+      const message = encodeURIComponent(err.userMessage || 'Something went wrong');
+      return res.redirect(`/Chatters/auth/Sign_In?error=${message}`);
     });
-  },
-
-  (err, req, res, next) => {
-    console.error(err.stack);
-    const message = encodeURIComponent(err.userMessage || 'Something went wrong');
-    return res.redirect(`/Chatters/auth/Sign_In?error=${message}`);
-  });
 
 router.get('/verify-email', async (req, res, next) => {
   const { token, id } = req.query;
@@ -330,21 +341,21 @@ router.get('/verify-email', async (req, res, next) => {
 
       res.render('layout', {
         title: 'Token verified',
-        display_backLink: false,
+        display_message: 'Your email has been successfully verified! You can now sign in.',
+        Sign_InButt: true,
         partials: {
-          content: 'verify_email_resPage'
-        },
-        paragraphMessage: 'Your email has been successfully verified! You can now sign in.'
+          content: 'displayMessage_nav'
+        }
       });
     }
     else {
       res.render('layout', {
         title: 'Token not found',
-        display_backLink: false,
+        display_message: 'The token is invalid or expired; please sign in again to receive a new token and complete email verification.',
+        Sign_InButt: true,
         partials: {
-          content: 'verify_email_resPage'
-        },
-        paragraphMessage: 'The token is invalid or expired; please sign in again to receive a new token and complete email verification.'
+          content: 'displayMessage_nav'
+        }
       });
     }
   }
@@ -548,11 +559,11 @@ router.route('/update-password')
       const message = encodeURIComponent(err.userMessage || 'Something went wrong');
       res.render('layout', {
         title: 'Update Password Error',
-        display_backLink: false,
+        display_message: message,
+        Sign_InButt: true,
         partials: {
-          content: 'verify_email_resPage'
-        },
-        paragraphMessage: message
+          content: 'displayMessage_nav'
+        }
       });
     })
   .post(async (req, res, next) => {

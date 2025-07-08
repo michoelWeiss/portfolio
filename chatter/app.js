@@ -8,7 +8,7 @@ import logger from 'morgan';
 import chatters_auth from './routes/chatters_auth.js';
 import chatsRouter, { setupChatSockets } from './routes/chats.js';
 import session from 'express-session';
-import sharedSession from'express-socket.io-session';
+import sharedSession from 'express-socket.io-session';
 import run_sqlPool from './pool.js';
 import debugLib from 'debug';
 const debug = debugLib('contacts:server');
@@ -58,9 +58,11 @@ app.use('/Bubbles', (req, res, next) => {
 app.get('/Chatters', (req, res, next) => {
   res.render('layout', {
     title: 'Home',
-    display_backLink: false,
+    display_message: 'Welcome to the home page loremloram100ddddddddddddddddddddddddd ddddddddddddddddddddddddddddddddd ddddddddddddddddddddddddddddd dddddddddddddddddddd ddddddddddddd ddddddd dddddddddddddddddddddddd ddddddddddddddddddddddddddddddd ddddddddddddddddddddddddddddddddd dddddddddddddddddddddddddd',
+    Sign_InButt: true,
+    Sign_UpButt: true,
     partials: {
-      content: 'home_chatting'
+      content: 'displayMessage_nav'
     }
   });
 });
