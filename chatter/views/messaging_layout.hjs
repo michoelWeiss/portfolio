@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chats</title>
+    <link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
+    <link rel='stylesheet' href='/stylesheets/messaging_homePage.css' />
+    <script src="/javascripts/jquery-3.7.1.min.js"></script>
+</head>
+
+<body>
+
+
+    <div class="link_container">
+        <a href="/Chatters" class="links">Home</a>
+        <a href="/Chatters/chats/log_out" class="links">Log Out</a>
+    </div>
+    {{#title}}
+    <header>
+        <h2>{{ title }}</h2>
+    </header>
+    {{/title}}
+
+    <main class="content-wrapper">
+        {{> content}}
+    </main>
+
+<div id="toast" class="toast" style="display: none;"></div>
+ 
+
+    <script src="/javascripts/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/javascripts/messaging_homePage.js"></script>
+</body>
+
+</html>

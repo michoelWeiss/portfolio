@@ -56,11 +56,15 @@ app.use('/Bubbles', (req, res, next) => {
 });
 
 app.get('/Chatters', (req, res, next) => {
+  const errorMessage = req.query.error || '';
+  console.log(errorMessage)
   res.render('layout', {
     title: 'Home',
     display_message: 'Welcome to the home page loremloram100ddddddddddddddddddddddddd ddddddddddddddddddddddddddddddddd ddddddddddddddddddddddddddddd dddddddddddddddddddd ddddddddddddd ddddddd dddddddddddddddddddddddd ddddddddddddddddddddddddddddddd ddddddddddddddddddddddddddddddddd dddddddddddddddddddddddddd',
     Sign_InButt: true,
     Sign_UpButt: true,
+    toastMessage: errorMessage,
+    toastType: 'error',
     partials: {
       content: 'displayMessage_nav'
     }

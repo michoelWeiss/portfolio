@@ -65,7 +65,7 @@ const Sign_in = async (req, res, next) => {
       user[verifyKey] = '';
     }
     else {
-      throw Object.assign(new Error('Verification key is incorrect'), { userMessage: 'Verification key is incorrect' });
+      throw Object.assign(new Error('Verification key is incorrect'), { userMessage: 'Verification key is incorrect' }); 
     }
 
     if (user.email_verified !== 1) {   // Is email verified
@@ -202,8 +202,8 @@ router.route('/Sign_Up')
     async (req, res, next) => {
       try {
         const { username, displayName, password, email, securityQ } = req.sanitizedData;
-        const sql = 'INSERT INTO users (username, display_name, password, email, security_question, join_date, exit_date, email_verified) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-        const result = await req.pool(sql, [username, displayName, password, email, securityQ, new Date(), new Date('9999-12-31'), 0]);
+        const sql = 'INSERT INTO users (username, display_name, password, email, security_question, email_verified) VALUES (?, ?, ?, ?, ?, ?)';
+        const result = await req.pool(sql, [username, displayName, password, email, securityQ, 0]);
         if (!result.affectedRows) {
           throw Object.assign(new Error('There was an error submitting your data, please try again.'), { userMessage: 'There was an error submitting your data, please try again.' });
         }
@@ -282,7 +282,7 @@ router.route('/sendVerificationLink')
   .post(async (req, res, next) => {
     try {
       if (!req.session.email) {
-        throw Object.assign(new Error('Error sending Verification Link, Please try again.'), { userMessage: 'Error sending Verification Link, Please try again.' });
+        throw Object.assign(new Error('Error sending Verification Link, Please try again.'), { userMessage: 'Error sending Verification Link, Please try again.' }); 
       }
       const { id, address } = req.session.email;
       const token = make_token();
@@ -315,7 +315,7 @@ router.route('/sendVerificationLink')
     },
     send_email,
     (req, res) => {
-      return res.redirect(`/Chatters/auth/sendVerificationLink?success=${encodeURIComponent('Verification Link has been sent.')}`);
+      return res.redirect(`/Chatters/auth/sendVerificationLink?success=${encodeURIComponent('Verification Link has been sent.')}`); 
     },
     (err, req, res, next) => {
       console.error(err.stack);

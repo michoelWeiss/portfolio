@@ -4,19 +4,211 @@ var router = express.Router();
 let pool;
 let chat_ServerList = {};
 
-/* GET users listing. */
+/////////////////
+//  Functions  //
+/////////////////
+
 const get_total_numb_of_chats = async () => {
-  const amountOf_chats = `SELECT 
+  try {
+    const amountOf_chats = `SELECT 
     g.total_chats
     FROM global_stats g
     WHERE id = 1;
       `;
-  const total = await pool(amountOf_chats, []);
-  if (total[0]?.total_chats) {
+    const total = await pool(amountOf_chats, []);
+    if (!total[0]?.total_chats) {
+      throw new Error();
+    }
     return total[0].total_chats;
   }
-  return null;
+  catch (err) {
+    throw Object.assign(new Error('Error getting number of chats, Please refresh page.'), { type: 'error' });
+  }
 };
+
+// gets list of chats
+const get_joinable_chats = async ({
+  searchText = '',
+  direction = 'forward', // 'forward' | 'backward'
+  cursor = null, // { name: '', id: 0 }
+  limit = 3
+}) => {
+  try {
+    let sql = '';
+    const params = [];
+    const isSearch = !!searchText.trim();
+    const pattern = `%${searchText.toLowerCase()}%`;
+    if (!cursor) {
+      cursor = direction === 'backward'
+        ? { name: 'ZZZZZZZZ', id: Number.MAX_SAFE_INTEGER }
+        : { name: '', id: 0 };
+    }
+
+    if (isSearch) {
+      // SEARCH MODE (no pagination)
+      sql = `
+        SELECT 
+          c.id AS chat_id,
+          c.name AS chat_name,
+          COUNT(cm.user_id) AS active_members,
+          INSTR(LOWER(c.name), ?) AS position
+        FROM chats c
+        LEFT JOIN chat_members cm 
+          ON cm.chat_id = c.id AND cm.exit_date > CURRENT_DATE
+        WHERE c.exit_date > CURRENT_DATE AND LOWER(c.name) LIKE ?
+        GROUP BY c.id, c.name
+        ORDER BY position ASC, c.name ASC
+      `;
+      params.push(searchText.toLowerCase(), pattern);
+    }
+    else {
+      // PAGINATED MODE
+      sql = `
+        SELECT 
+          c.id AS chat_id,
+          c.name AS chat_name,
+          COUNT(cm.user_id) AS active_members
+        FROM chats c
+        LEFT JOIN chat_members cm 
+          ON cm.chat_id = c.id AND cm.exit_date > CURRENT_DATE
+        WHERE c.exit_date > CURRENT_DATE
+      `;
+
+      // Cursor-based pagination logic
+      if (cursor && cursor.name) {
+        if (direction === 'forward') {
+          sql += ` AND (c.name > ? OR (c.name = ? AND c.id > ?))`;
+        } else if (direction === 'backward') {
+          sql += ` AND (c.name < ? OR (c.name = ? AND c.id < ?))`;
+        }
+        params.push(cursor.name, cursor.name, cursor.id);
+      }
+
+      sql += ` GROUP BY c.id, c.name`;
+
+      sql += direction === 'backward'
+        ? ` ORDER BY c.name DESC, c.id DESC`
+        : ` ORDER BY c.name ASC, c.id ASC`;
+
+      if (typeof limit === 'number') {
+        sql += ` LIMIT ?`;
+        params.push(limit);
+      }
+    }
+
+    let result = await pool(sql, params) || [];
+    console.log(result)
+    if (!isSearch && direction === 'backward') {
+      result = result?.reverse();
+    }
+    return result;
+  } catch (err) {
+    console.error(err)
+    throw Object.assign(new Error('Error getting Chats, Please refresh page.'), { type: 'error' });
+  }
+};
+
+
+// gets list of chats
+const get_userList = async (id, last_display_name = '', last_id = 0, limit = 100) => {
+  try {
+    if (!id) { throw Object.assign(new Error('Missing credentials, Please refresh page.'), { type: 'error' }); }
+    const sql = `
+    SELECT u.id AS user_id, u.display_name
+    FROM users u
+    WHERE u.exit_date > CURRENT_DATE
+      AND u.email_verified = TRUE
+      AND u.id != ?
+      AND (
+        u.display_name > ?
+        OR (u.display_name = ? AND u.id > ?)
+      )
+    ORDER BY u.display_name ASC, u.id ASC
+    LIMIT ?
+  `;
+    const result = await pool(sql, [id, last_display_name, last_display_name, last_id, limit]) || [];
+    return result;
+  }
+  catch (err) {
+    throw Object.assign(new Error('Error getting Users, Please refresh page.'), { type: 'error' });
+  }
+};
+
+const search_userList = async (id, searchText) => {
+  try {
+    if (!id || !searchText) { throw Object.assign(new Error('Missing credentials or search Text, Please refresh page.'), { type: 'error' }); }
+
+    const searchTerm = searchText.toLowerCase();
+    const pattern = `%${searchTerm}%`;
+
+    const sql = `
+      SELECT 
+        u.id AS user_id, 
+        u.display_name,
+        INSTR(LOWER(u.display_name), ?) AS position
+      FROM users u
+      WHERE 
+        u.exit_date > CURRENT_DATE
+        AND u.email_verified = TRUE
+        AND u.id != ?
+        AND LOWER(u.display_name) LIKE ?
+      ORDER BY 
+        position ASC, 
+        u.display_name ASC, 
+        u.id ASC
+    `;
+    const result = await pool(sql, [searchTerm, id, pattern]) || [];
+    console.log('result ', result)
+    return result;
+  }
+  catch (err) {
+    throw Object.assign(new Error('Error getting Users, Please refresh page.'), { type: 'error' });
+  }
+};
+
+const setUp_joinChatsList = async (limit) => {
+  try {
+    const total = await get_total_numb_of_chats();
+    let showing = [];
+    let next = [];
+    let prev = [];
+
+    showing = await get_joinable_chats({ direction: 'forward', limit });
+    if (showing.length === 0) {
+      throw Object.assign(new Error('Error getting Chats, Please refresh page.'), { type: 'error' });
+    }
+    const showingCursor = showing[showing.length - 1];
+    next = await get_joinable_chats({ direction: 'forward', cursor: { name: showingCursor.chat_name, id: showingCursor.chat_id }, limit });
+    console.log('limit ', limit, ' total ', total, ' ', total % limit === 0 ? limit : total % limit)
+    prev = await get_joinable_chats({ direction: 'backward', limit: total % limit === 0 ? limit : total % limit });
+    let joinChatList = {};
+    joinChatList = {
+      showing: {
+        chats: showing,
+        firstCursor: { name: showing[0]?.chat_name, id: showing[0]?.chat_id },
+        lastCursor: { name: showing[showing.length - 1]?.chat_name, id: showing[showing.length - 1]?.chat_id }
+      },
+      next: {
+        chats: next,
+        firstCursor: { name: next[0]?.chat_name, id: next[0]?.chat_id },
+        lastCursor: { name: next[next.length - 1]?.chat_name, id: next[next.length - 1]?.chat_id }
+      },
+      prev: {
+        chats: prev,
+        firstCursor: { name: prev[0]?.chat_name, id: prev[0]?.chat_id },
+        lastCursor: { name: prev[prev.length - 1]?.chat_name, id: prev[prev.length - 1]?.chat_id }
+      },
+    };
+    return joinChatList;
+  }
+  catch (err) {
+    const message = err.message || 'Something went wrong';
+    const type = err.type || 'error';
+    throw Object.assign(new Error(message), { type });
+  }
+};
+
+// gets list of a users chats with the last message sent and a flag if it was read yet
 const load_user_chats = async (id) => {
   try {
     const sql = `
@@ -50,14 +242,23 @@ LEFT JOIN users u ON m.sender_id = u.id
 WHERE cm.user_id = ? AND cm.exit_date > CURRENT_DATE
 ORDER BY m.date_sent DESC;
     `;
-    const results = await pool(sql, [id]);
+    const results = await pool(sql, [id]) || [];
     return results;
   }
   catch (err) {
-    throw err;
+    throw Object.assign(new Error('Error getting your Chats, Please refresh page.'), { type: 'error' });
   }
-
 };
+
+
+
+
+
+
+
+
+
+
 
 const load_messages = async (user_id, chat_id) => {
   try {
@@ -148,79 +349,40 @@ const upload_message = async (user_id, chat_id, message) => {
     throw err;
   }
 };
-const get_joinable_chats = async (offset, limit = 3) => {
-  try {
-    const sql = `SELECT 
-    c.id AS chat_id,
-    c.name AS chat_name,
-    COUNT(cm.user_id) AS active_members
 
-    FROM chats c
-    LEFT JOIN chat_members cm 
-    ON cm.chat_id = c.id 
-    AND cm.exit_date > CURRENT_DATE
-    GROUP BY c.id, c.name
-    ORDER BY c.name ASC
-    LIMIT ? OFFSET ?;
-      `;
-    console.log(offset)
-    return await pool(sql, [limit, offset]);
+/////////////////
+// Socket code //
+/////////////////
 
-  }
-  catch (err) {
-    return [];
-  }
-};
 function setupChatSockets(io) {
   io.on('connection', async (socket) => {
     const session = socket.handshake.session;
     const user = session.loggedIn;
+    const LIMIT = 3;
 
     if (!user || !user.id) {
-      console.log("Unauthenticated socket connection");
+      console.error("Unauthenticated socket connection");
+      socket.emit('force_logout', {
+        message: 'Unauthenticated socket connection.'
+      });
       socket.disconnect();
-      return;
     }
-    console.log(`User ${user.id} connected via socket`);
 
-    const total = await get_total_numb_of_chats();
-    const showing = await get_joinable_chats(0);
-    const next = await get_joinable_chats(3);
-    const prev = await get_joinable_chats(total % 3 === 0 ? total - 3 : total - (total % 3));
-    let joinChatList = {};
-    if (showing.length && next.length && prev.length)
-      joinChatList = { showing: { chats: showing, first: 1, last: 3 }, next: { chats: next, first: 4, last: 6 }, prev: { chats: prev, first: total - prev.length + 1, last: total } }
-    socket.emit('connection_successfull', { user, joinChatList, num_of_chats: total });
-
-    socket.on('scroll_joinChats', async ({ offset, direction }) => {
-      const total = await get_total_numb_of_chats();
-      if (total) {
-        let first;
-        let last;
-        let limit = 3;
-        if (direction === 'next') {
-          if (total <= offset) {
-            offset = 0;
-          }
-        }
-        else {
-          if (offset < 0) {
-            limit = total % 3 === 0 ? 3 : total % 3
-            offset = total - limit;
-          }
-        }
-        const results = await get_joinable_chats(offset, limit);
-        if (!results.length) { return; /* handle error */ }
-        first = offset + 1;
-        last = offset + results.length;
-        socket.emit('new_scroll_chats', { results, first, last, direction })
-      }
-    });
+    try {
+      let joinChatList = await setUp_joinChatsList(LIMIT);
+      let userList = await get_userList(user.id);
+      socket.emit('connection_successfull', { user, joinChatList, userList, LIMIT });
+    }
+    catch (err) {
+      const message = err.message || 'Something went wrong';
+      const type = err.type || 'error';
+      sendToast(message, type);
+    }
 
     socket.on('get_chatList', async (callback) => {
-      const chats = await load_user_chats(user.id);
-      if (chats.length) {
-        chats.forEach(chat => {
+      try {
+        const chats = await load_user_chats(user.id);
+        chats.forEach(chat => {  // add socket to global list 
           if (!chat_ServerList[chat.chat_id]) {
             chat_ServerList[chat.chat_id] = {};
           }
@@ -228,9 +390,143 @@ function setupChatSockets(io) {
             chat_ServerList[chat.chat_id][user.id] = socket;
           }
         });
-        callback(chats)
+        callback(chats);
+      }
+      catch (err) {
+        const message = err.message || 'Something went wrong';
+        const type = err.type || 'error';
+        sendToast(message, type);
+        callback([]);
       }
     });
+
+    socket.on('load_more_users', async ({ last_display_name = '', last_id = 0, emptyTable = false, refresh = false, toast }, callback) => {
+      try {
+        let users;
+        if (refresh) {
+          users = await get_userList(user.id);
+        }
+        else {
+          users = await get_userList(user.id, last_display_name, last_id, 50);
+        }
+        console.log(toast?.message, toast?.type);
+        if (users.length > 0) {
+          sendToast(toast?.message, toast?.type || 'info');
+        }
+        else {
+          sendToast('No results found.' || 'error');
+        }
+        callback(users, emptyTable);
+      }
+      catch (err) {
+        const message = err.message || 'Something went wrong';
+        const type = err.type || 'error';
+        sendToast(message, type);
+        callback([], false);
+      }
+    });
+
+    socket.on('search_forUsers', async ({ searchText, toast }, callback) => {
+      try {
+        if (!searchText) {
+          throw Object.assign(new Error('Error, missing search Text.'), { type: 'error' });
+        }
+        const users = await search_userList(user.id, searchText);
+        console.log(toast?.message, toast?.type);
+        if (users.length > 0) {
+          sendToast(toast?.message, toast?.type || 'success');
+        }
+        else {
+          sendToast('No results found.' || 'error');
+        }
+        callback(users, users.length > 0);
+      }
+      catch (err) {
+        const message = err.message || 'Something went wrong';
+        const type = err.type || 'error';
+        sendToast(message, type);
+        callback([], false);
+      }
+    });
+
+    socket.on('scroll_joinChats', async ({ cursor, direction, limit = 3 }, callback) => {
+      try {
+        const total = await get_total_numb_of_chats();
+        if (!total) { throw Object.assign(new Error('Error getting number of chats, Please refresh page.'), { type: 'error' }); }
+
+        let results = [];
+        if (direction === 'forward') {
+          results = await get_joinable_chats({ direction, cursor, limit });
+          if (results.length === 0) {
+            results = await get_joinable_chats({ direction, limit }); // by defalt cursor is reset 
+          }
+        }
+        else {
+          results = await get_joinable_chats({ direction, cursor, limit });
+          if (results.length === 0) {
+            results = await get_joinable_chats({ direction, limit: total % limit === 0 ? limit : total % limit }); // by defalt cursor is reset 
+          }
+        }
+        if (!results.length) { throw Object.assign(new Error('No chats found, Please refresh page.'), { type: 'error' }); }
+        callback({
+          results,
+          firstCursor: { name: results[0]?.chat_name, id: results[0]?.chat_id },
+          lastCursor: { name: results[results.length - 1]?.chat_name, id: results[results.length - 1]?.chat_id },
+          direction
+        });
+      }
+      catch (err) {
+        const message = err.message || 'Something went wrong';
+        const type = err.type || 'error';
+        sendToast(message, type);
+        callback({ results: [] });
+      }
+    });
+
+    socket.on('refresh_chats', async ({ toast }, callback) => {
+      try {
+        const results = await setUp_joinChatsList(LIMIT);
+        if (results.length > 0) { throw Object.assign(new Error('No chats found, Please refresh page.'), { type: 'error' }); }
+        sendToast(toast?.message, toast?.type || 'info');
+        callback(results);
+      }
+      catch (err) {
+        const message = err.message || 'Something went wrong';
+        const type = err.type || 'error';
+        sendToast(message, type);
+      }
+    });
+
+    socket.on('search_forJoinChats', async ({ searchText, toast }, callback) => {
+      try {
+        if (!searchText) { throw Object.assign(new Error('Error, missing search Text.'), { type: 'error' }); }
+        let success = true;
+        let chats = await get_joinable_chats({ searchText });
+        if (chats.length > 0) {
+          sendToast(toast?.message, toast?.type || 'success');
+        }
+        else {
+          chats = await setUp_joinChatsList(LIMIT);
+          success = false;
+          sendToast('No search results found. Refreshing Chat list.' || 'error');
+        }
+        console.log('chats ', chats)
+        callback({ chats, success })
+      }
+      catch (err) {
+        const message = err.message || 'Something went wrong';
+        const type = err.type || 'error';
+        sendToast(message, type);
+        callback({ success: false, chats: await setUp_joinChatsList(LIMIT) })
+      }
+    });
+
+
+
+
+
+
+
 
     socket.on('req_to_join_chat', async (chatId) => {
       const sql = ` INSERT INTO req_to_join_chat (user_id, chat_id) 
@@ -291,6 +587,20 @@ function setupChatSockets(io) {
       }
     });
 
+    ////////////////////
+    //  IO Functions  //
+    ////////////////////
+
+    function sendToast(message, type = 'info') {
+      if (message) {
+        socket.emit('toast', {
+          message,
+          type
+        });
+      }
+    }
+
+
   });
 }
 router.use((req, res, next) => {
@@ -304,10 +614,15 @@ router.get('/', async function (req, res, next) {
     if (req.session.loggedIn) {
       const user = req.session.loggedIn;
       if (!user.id) {
-        throw new Error("missing valid ID")
+        throw Object.assign(new Error('Error, missing valid ID'), { userMessage: 'Error, missing valid ID' });
       }
-      res.render('messaging_homePage', {
-        title: 'Chats'
+      res.render('messaging_layout', {
+        title: 'Chats',
+        // toastMessage: 'you made it',
+        //  toastType: 'error',
+        partials: {
+          content: 'messaging_homePage'
+        }
       });
     }
     else {
@@ -315,19 +630,20 @@ router.get('/', async function (req, res, next) {
     }
 
   } catch (err) {
-    next(err); // Pass error to global error handler
+    console.error(err.stack);
+    const message = encodeURIComponent(err.userMessage || 'Error, Please sign in again.');
+    req.session.destroy(() => res.redirect(`/Chatters?error=${message}`));
   }
 });
 
 
-router.get('/log_out', (req, res, next) => {
-  req.session.destroy(() => res.redirect('/Chatters'));
-});
-
-// Global error handler
-router.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).send('Server Error');
+router.post('/log_out', (req, res) => {
+  const { error } = req.body || {};
+  const redirectUrl = error
+    ? `/Chatters?error=${encodeURIComponent(error)}`
+    : '/Chatters';
+  console.log(redirectUrl)
+  req.session.destroy(() => res.redirect(redirectUrl));
 });
 
 

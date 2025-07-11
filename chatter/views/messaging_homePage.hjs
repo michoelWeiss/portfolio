@@ -1,83 +1,92 @@
-<!DOCTYPE html>
-
-<html>
-
-<head>
-  <meta charset="UTF-8">
-  <title>Chats</title>
-  <link rel='stylesheet' href='/stylesheets/bootstrap.min.css' />
-  <link rel='stylesheet' href='/stylesheets/messaging_homePage.css' />
-</head>
-
-<body>
-
-  <div class="link_container">
-    <a href="/Chatters" class="links">Home</a>
-    <a href="/Chatters/chats/log_out" class="links">Log Out</a>
+<div class="section-wrapper">
+  <div class="section-header">
+    <div class="section-header-left">
+      <h3>My Chats</h3>
+    </div>
   </div>
-
-  <header>
-    <h2>Chats</h2>
-  </header>
-
   <div id="chat_list"> </div>
+</div>
+
+<div id="message_Page">
+  <button class="close_btn">&times;</button>
+  <div id="chat_Info"></div>
+  <div id="message_Container"></div>
+  <form>
+    <input id="message_input" type="text">
+    <button id="submit_button" type="button">Submit</button>
+  </form>
+</div>
 
 
-  <div id="message_Page">
-    <button class="close_btn">&times;</button>
-    <div id="chat_Info"></div>
-    <div id="message_Container"></div>
-    <form>
-      <input id="message_input" type="text">
-      <button id="submit_button" type="button">Submit</button>
-    </form>
+
+<div id="join_chats_page">
+  <div class="section-header">
+    <div class="section-header-left">
+      <h3>Join Chats</h3>
+      <p>Click on a chat to send a join request to the admin</p>
+    </div>
+    <button id="create-chat-button">Create Chat</button>
   </div>
 
+  <form>
+    <button id="join_chats_refresh_button" type="button">Refresh</button>
+    <input id="join_chats_input" type="text">
+    <button id="join_chats_submit_button" type="button">Search</button>
+  </form>
 
-  <div id="join_chats_page">
-    <h3>Join Chats</h3>
-
-    <form>
-      <input id="join_chats_input" type="text">
-      <button id="join_chats_submit_button" type="button">Search</button>
-    </form>
-
-    <div id="join_chats_main_row" class="carousel slide">
-      <button id="join_chats_LastButt" class="carousel-control-prev" type="button" data-bs-target="#join_chats_main_row" data-bs-slide="prev">
+  <div id="join_chats_main_row" class="carousel slide">
+    <div class="join-chats-carousel-row">
+      <button id="join_chats_LastButt" class="carousel-control-prev" type="button" data-bs-target="#join_chats_main_row"
+        data-bs-slide="prev">
         <span class="visually-hidden">Previous</span>
         &larr;
-        </button>
+      </button>
 
       <div id="join_chats_wrapper" class="carousel-inner">
 
         <div class="carousel-item join_chats_Container active showing">
+          <div class="join-chats-inner-row">
+            <!-- Your chat cards go here -->
+          </div>
         </div>
         <div class="carousel-item join_chats_Container next">
+          <div class="join-chats-inner-row">
+            <!-- Your chat cards go here -->
+          </div>
         </div>
         <div class="carousel-item join_chats_Container prev">
+          <div class="join-chats-inner-row">
+            <!-- Your chat cards go here -->
+          </div>
         </div>
 
       </div>
 
-      <button id="join_chats_NextButt" class="carousel-control-next" type="button" data-bs-target="#join_chats_main_row" data-bs-slide="next">
+      <button id="join_chats_NextButt" class="carousel-control-next" type="button" data-bs-target="#join_chats_main_row"
+        data-bs-slide="next">
         <span class="visually-hidden">Next</span>
         &rarr;
-        </button>
+      </button>
     </div>
+  </div>
+</div>
 
-
-
-
-
+<div class="section-wrapper user-wrapper">
+  <div class="section-header">
+    <div class="section-header-left">
+      <h3>Users</h3>
+      <p>Click on a user to start messaging</p>
+    </div>
+  </div>
+  <div id="user-list-wrapper">
+    <form>
+      <button id="user_list_refresh_button" type="button">Refresh</button>
+      <input id="user_list_input" type="text">
+      <button id="user_list_submit_button" type="button">Search</button>
+    </form>
+    <div id="user_list" class="user-list-container">
+      <!-- User cards will be inserted here -->
+    </div>
   </div>
 
-
-
-
-  <script src="/javascripts/jquery-3.7.1.min.js"></script>
-  <script src="/javascripts/bootstrap.bundle.min.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/javascripts/messaging_homePage.js"></script>
-</body>
-
-</html>
+</div>

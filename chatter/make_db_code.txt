@@ -1,16 +1,16 @@
 CREATE DATABASE IF NOT EXISTS Chatter;
 
 CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT UNIQUE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE,
     display_name VARCHAR(100),
     password VARCHAR(255),
-    email VARCHAR(320),
+    email VARCHAR(320) NOT NULL,
     security_question VARCHAR(255),
-    join_date DATE,
-    exit_date DATE,
-    email_verified BOOLEAN,
-    PRIMARY KEY (email, exit_date)
+    join_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    exit_date DATE NOT NULL DEFAULT '9999-09-09',
+    email_verified BOOLEAN DEFAULT FALSE,
+    UNIQUE (email, exit_date)
 );
 
 CREATE TABLE IF NOT EXISTS tokens (
@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS chats (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    exit_date DATE NOT NULL DEFAULT '9999-09-09',
     creator INT NOT NULL,
     FOREIGN KEY (creator) REFERENCES users(id)
 );
@@ -95,123 +96,233 @@ CREATE TABLE global_stats (
 );
 
 ADDED DATA
-INSERT INTO users (username, display_name, password, email, security_question, join_date, exit_date, email_verified)
-VALUES 
-('jdoe', 'John Doe', 'hashed_password_1', 'jdoe@example.com', 'hashed_answer_1', '2023-01-15', '9999-12-31', TRUE),
-('asmith', 'Alice Smith', 'hashed_password_2', 'asmith@example.com', 'hashed_answer_2', '2022-06-20', '9999-12-31', TRUE),
-('bwayne', 'Bruce Wayne', 'hashed_password_3', 'bwayne@wayneenterprises.com', 'hashed_answer_3', '2024-03-01', '9999-12-31', TRUE),
-('ckent', 'Clark Kent', 'hashed_password_4', 'ckent@dailyplanet.com', 'hashed_answer_4', '2021-09-10', '9999-12-31', FALSE),
-('dprince', 'Diana Prince', 'hashed_password_5', 'dprince@themyscira.org', 'hashed_answer_5', '2023-11-11', '9999-12-31', TRUE);
+INSERT INTO users (username, display_name, password, email, security_question, email_verified)
+VALUES
+('stevensonmark', 'Mrs. Barbara Cruz', 'LI5aqHTsCM*@9&kL', 'jordanhill@yahoo.com', 'Environment improve loss green.', TRUE),
+('xmcmillan', 'Ryan Davis', '(@BPNk%UkN6RVLzR', 'jhoover@hotmail.com', 'Ago former likely fill chance.', FALSE),
+('zyoung', 'Tara Green', '+v2uGecr(*8$xK)B', 'llee@yahoo.com', 'End talk exactly thus blood machine.', FALSE),
+('anita31', 'Melinda Tanner', 'OIL_TIPn_5j!19C&', 'martinezvincent@bird.info', 'Possible with others animal what enjoy.', FALSE),
+('rebecca32', 'Bobby Davis', '88ff^lSox+%%5lEm', 'maureenrussell@gmail.com', 'Project believe public where.', FALSE),
+('oevans', 'Ruth Sosa', 'JV4&3fx_xE&R1GJz', 'phillipslaura@mccarthy.com', 'Behind direction against amount.', TRUE),
+('yking', 'Jerome Hunt', 'CKhDmp2r%R2cBeS6', 'wcole@yahoo.com', 'Leg reason several join apply safe song unit.', TRUE),
+('sellersamy', 'Cindy Olson', 'vBp8KIBW@1eeN*Vw', 'jonathan12@clark-hill.com', 'Lay human table medical bit parent ground.', TRUE),
+('valexander', 'Kristi Horn', 'PUZ(V!zWTXK8YbS2', 'wendybryant@gmail.com', 'Whether last dark authority future box.', TRUE),
+('princechristopher', 'Amanda Gordon', 'v(e2%oozljN9L0st', 'robertmartinez@graham.com', 'Total may case enter both social law.', TRUE),
+('kmunoz', 'Michele Ray', ')x1Jq2G@&2ExWNcN', 'zlewis@harris.com', 'Research spend ready full instead model.', FALSE),
+('danielalexander', 'Ashlee Russo', 'e(MGx920kJkzxKms', 'zallen@orr.biz', 'Image meeting down respond what.', TRUE),
+('cdaugherty', 'Tammy Stevens', '!ZM2!kreB8UWmS%p', 'brad58@williams.org', 'Live exist commercial tend film improve.', FALSE),
+('kentdavid', 'Kimberly Miller', '#@aUU!JyCX31NOOa', 'coreyferguson@cervantes.org', 'Heavy sister something apply new writer often.', FALSE),
+('dean01', 'Hunter Carter', 'g!1G8NVKpu^k8yfA', 'howardmarcus@hall-mckinney.com', 'Culture her body about rather.', TRUE),
+('bbarton', 'Dennis Scott', '+UA+9IE$^M0Fy&mk', 'justinmartinez@hall-robbins.com', 'Have project politics garden board.', TRUE),
+('reginald07', 'Jeff Clayton', '24i35BTl&(Wvv6Dc', 'hernandeznicole@miller-allison.biz', 'Company home reflect wind.', TRUE),
+('joel77', 'Amy Valencia', '38Zy_e_k+%URjwP^', 'jessicasantiago@lewis-johnson.com', 'Shake imagine simply people.', FALSE),
+('kimberly21', 'David Ford', '_^UcPa5cR(M2V7H_', 'smithbenjamin@yahoo.com', 'Assume analysis tough teacher well threat case.', TRUE),
+('savannahmurphy', 'David Williamson', '5XVkfexV$VTeonMb', 'ronald75@gmail.com', 'Enough small red individual.', FALSE),
+('davidfarley', 'Jeffrey Moreno', '#yRu_9aalseb3jMh', 'susan23@gmail.com', 'Others various civil significant.', FALSE),
+('zwebster', 'Jacqueline Cook', 'gTC7+qVu@)YH6mu#', 'zscott@gmail.com', 'Home occur economic land job subject without hand.', TRUE),
+('jacob91', 'Christie Young', 'bful%4m57&9cW1QS', 'rmccall@gmail.com', 'Whatever difficult together card finally pattern.', FALSE),
+('brownpatrick', 'Patrick Norman', '@3pAv0RrqEU1iikh', 'chadwhite@gmail.com', 'Ahead once vote American perhaps thousand rich according.', FALSE),
+('xcastillo', 'Robin Fox', ')in2JcMJTmssV+eU', 'melissaedwards@yahoo.com', 'Really everybody fight.', FALSE),
+('meredithhayes', 'Jacob Lee', 'AC7fj5WL&&_egAPc', 'michael11@gmail.com', 'Agent understand hear central.', FALSE),
+('hollowaybrittany', 'Michelle Dickson', '#l7hT)rc3!xshCTe', 'biancaguerra@yahoo.com', 'Ask never identify successful know day cut.', TRUE),
+('kennethluna', 'Samantha Ramirez', 'we!#v4C^L^7Zf_Hm', 'hbaker@yahoo.com', 'Door one from partner.', FALSE),
+('burkemarcus', 'Stephen Peck', 'yI+8jZmrD*dxU6xi', 'janicewilliams@gmail.com', 'Collection simply size high break.', FALSE),
+('palmertyler', 'Melvin Harrison', 'vw3kFNbG_y9QnP(1', 'robert14@yahoo.com', 'Number major lead red likely wear.', TRUE),
+('parroyo', 'Jason Cook', 'r8q**(CyhO&2@PGA', 'mejiawilliam@gmail.com', 'Performance animal buy manage moment argue.', TRUE),
+('camachojared', 'Jeffrey Whitehead', 'U#J4XUhI6oy396Vw', 'lucerojanet@singleton.info', 'Fact cost energy raise occur commercial.', TRUE),
+('clarkbarbara', 'Erin White', 'Q&s10EfF#pZINSRx', 'robertavery@murray.com', 'Leader nor huge modern serious police forward.', FALSE),
+('kristin34', 'Daniel Mccann', 'GSX1Yf6Y0*$pzXpz', 'herrerabrandi@hotmail.com', 'Bag feel sign green professional.', FALSE),
+('kathleen73', 'Matthew Gaines', '%6DMqBHSwW)H@wwz', 'kaylabanks@nelson-jones.com', 'Bill yard line partner claim say.', TRUE),
+('aprilkhan', 'Michael Stone', 'md7+JT&%l!$k8Oqe', 'jhinton@gmail.com', 'Short hear crime on leg possible.', TRUE),
+('jason10', 'John Ramirez', 'u1&1SHgIb)@qZQ@T', 'xrangel@yahoo.com', 'Single cut the outside process purpose.', FALSE),
+('charlenewillis', 'Emily Ballard', '(7qStwyo&E02gxr%', 'bcarroll@yahoo.com', 'Word risk suffer second.', TRUE),
+('ryanmiranda', 'Kimberly Vazquez', '+m720HwGDC^MJKY!', 'klowery@duran.net', 'Write although chair total where condition.', FALSE),
+('barrerasusan', 'Christopher Hartman', '6o%&xY_X(2gAgnju', 'gutierrezheidi@watson.net', 'Fly light phone.', TRUE),
+('simpsonerin', 'Madison Kelley', '+LNnAfuy_M9*y4m%', 'riosjoseph@anderson.com', 'Test fight natural air today know.', TRUE),
+('jacob08', 'Tiffany Watson', 'r&luenUFj8X99Wee', 'tyler12@gmail.com', 'Government important must star tree.', FALSE),
+('samantharyan', 'Laurie Wright', '&IM8d247kLBSrOtj', 'gsmith@yahoo.com', 'Camera system per success authority seat feel.', FALSE),
+('jessetyler', 'Jodi Campbell', 'V%hL&Cm@*mj1%EUP', 'garciawendy@butler.com', 'Sort her seat practice law per together.', TRUE),
+('mbrown', 'Sydney Thomas', '((8GJw)^*91PRC(%', 'greenrichard@gmail.com', 'Nature market system pay mouth pass.', TRUE),
+('qsimpson', 'Donna Bradshaw', 'dD12Tb2JY@%Mrllz', 'vmiller@martinez-jenkins.net', 'Thus truth both edge reduce letter matter.', TRUE),
+('karenmeyer', 'Stephen Love', 'l9OP*wfe%ElYK9Y3', 'lisa84@hotmail.com', 'Chance few without similar four force hope.', FALSE),
+('milleredward', 'Daniel Vargas', 's9E%xQNCCKP52IQk', 'kingjudy@bishop.biz', 'Claim sort military tell woman thought.', FALSE),
+('colemankendra', 'Alex Mccarty', 'TpPP0i0YDd!Ri2nf', 'nathan83@gmail.com', 'Increase big stage six.', FALSE),
+('kaylalewis', 'Ariel Walton', '*l6hN^ONRttOztyq', 'woodwardmary@jackson.com', 'Production which according think physical travel.', TRUE),
+('davidpeterson', 'Joseph Mcgrath', 'hqHV3PxU!X%z0Tvr', 'stevensmichael@yahoo.com', 'Send nice natural peace country.', FALSE),
+('zrogers', 'Erik Chapman', 'S%06VZSKz&xj_mda', 'jharmon@mcclure.com', 'Mention value station he add nor.', FALSE),
+('uowens', 'Debra Martinez', '824*X&y4n^%CekAu', 'hinestony@yahoo.com', 'Price history Democrat almost.', TRUE),
+('hawkinstiffany', 'Michael Romero', 'T$)RDSmE_9ehAuGv', 'dmartinez@taylor.com', 'Painting class force class assume.', TRUE),
+('samanthagarza', 'Susan Wilson', 'hs4P6YYr+smV($FB', 'greenedonald@gmail.com', 'Reveal itself true trade plan.', FALSE),
+('shannon25', 'Susan Barnes', 'L#m2QzQOVFAs&NpV', 'kathryn90@yahoo.com', 'Less finally hair house dog.', TRUE),
+('kathleenfriedman', 'Brett Wright', '#+_Fq(*g2Vo5N!G8', 'lisaerickson@yahoo.com', 'Phone scientist clearly think tonight significant.', FALSE),
+('andrew20', 'Shaun Hanson', 'ZI50b!PbU*ay8uY*', 'nelsonnatalie@richards.info', 'Language imagine follow charge rich.', TRUE),
+('silvacarol', 'James Leblanc', 'BS282%Pea@)!uHyt', 'gilesmichael@gmail.com', 'Big TV suddenly member.', TRUE),
+('wbanks', 'Erin Taylor', '3X&NnmsJ371&iy$d', 'thomasaaron@walker.biz', 'Country else million finish case.', TRUE),
+('elizabethclark', 'Jimmy Parsons', 'Y15dipaX@5d9C&sU', 'imartin@yahoo.com', 'Production degree check know investment society.', TRUE),
+('kennedymarie', 'Kristin Brady', 'N$8WVrrTTo*@Pyi)', 'diane23@romero-carroll.com', 'Story much lot.', TRUE),
+('derek87', 'Erica Lopez', '_kN8Jww8^%0iBxOT', 'luisvasquez@hutchinson-quinn.net', 'Different nearly watch when out.', FALSE),
+('qmedina', 'Kyle Davis', '!3zC@_nLp!l##qpn', 'charlesadams@miller.com', 'Material study above read door cell edge bad.', FALSE),
+('williamsstephanie', 'Marie Martin', 'L5Vop$GM(ewMNo)j', 'christinawright@mckenzie-adams.com', 'National four rest smile cultural drive.', FALSE),
+('claudia92', 'Mrs. Jennifer Lopez', '@ci6QuuEwN93R+ne', 'richard63@gmail.com', 'Dinner eat size of short.', FALSE),
+('umiller', 'Tracy Dillon', 'VgZ^V+4P02cirW))', 'macdonalddonald@velez-yang.com', 'Stock mention quite.', FALSE),
+('matthewfitzgerald', 'Rebecca May', '*SIYM4CYE27sWxua', 'garciamario@hill.com', 'Republican treatment community once people your.', TRUE),
+('lblanchard', 'Charles Fernandez', 'wCXUzszx_6lR71S)', 'eric38@gmail.com', 'Man pressure whole movement field picture fund.', FALSE),
+('rdiaz', 'Jake Castillo', '9u0O#%g3DG$zzapI', 'ricardo51@hotmail.com', 'Store offer get color such person call American.', TRUE),
+('tinajohnson', 'Jordan Williams', ')WcS4kDtWAF_k!Y0', 'nelsonlauren@shea-moreno.com', 'Often occur program art.', TRUE),
+('jdavis', 'Kevin Jefferson', '^*9I(gljDysH5wMU', 'allenallison@hotmail.com', 'Upon anyone final response already maybe.', TRUE),
+('audreygordon', 'Lee Rodriguez', ')8We0DbiPs_l+RXx', 'tbarber@king-singh.com', 'With technology relate most.', TRUE),
+('ericksonkristine', 'Allison Wright', 'AM3s1TNyCU0%9T+w', 'yscott@martin.com', 'Value chair she have.', FALSE),
+('michaelaramos', 'Joy Chan', 'G_5QwAD9%4Yj4H_l', 'amy68@gmail.com', 'Level compare organization physical car air sort.', FALSE),
+('nburns', 'Russell Daniels', '%tPnEnlu@OQmy3R%', 'meganyoung@hotmail.com', 'View thing available international six require.', FALSE),
+('lewisjerry', 'Phillip Reynolds', 'm$0ChAqLiEuvrK$f', 'vhale@gmail.com', 'Party on agreement land face tough.', FALSE),
+('glennmartinez', 'Jessica Lyons', 'z(LF3zm6#k5y2RO1', 'beverlywagner@lee-miranda.com', 'Research choose ten number black community give.', FALSE),
+('timothyhines', 'Brian Skinner', 'Rko4o5Uv@F2ve6UB', 'johnsonlaura@gmail.com', 'Right anything debate whose find soldier.', TRUE),
+('danielhooper', 'Sarah Lewis', '1e8GMZig#oGFumfy', 'herreradaniel@baker.net', 'Television system system leader us character sell by.', FALSE),
+('lrichardson', 'Carla Jones', 'v(7gkc(OAUD$Wmvr', 'darren81@olson.com', 'Across issue seem Congress year defense else.', TRUE),
+('gtaylor', 'Ryan Sanchez', 'TG+1Ro3R15yT%Gio', 'bwilliams@chang.biz', 'From next cover another five modern.', FALSE),
+('chenamy', 'Amanda Jones', '193O7CGj$1yCG@BG', 'jessicasims@yahoo.com', 'Practice development western to list blood maybe.', FALSE),
+('hillgabrielle', 'Jose Vega', '*$08I4gcGim*q*fM', 'yarnold@kane.biz', 'Ever spend trip throw room model.', TRUE),
+('campbellcarol', 'Mr. Michael Simmons Jr.', '&bO$9%Ie41vCH8fH', 'sellis@rivera.com', 'Already yet sense end radio.', FALSE),
+('jonesalicia', 'Kristen Lopez', 'B&7NKq(@d^hYRglY', 'burkechristina@yahoo.com', 'Necessary south color hour available energy.', FALSE),
+('byoung', 'Gary May', 'SE_h*4uW7^W8&%La', 'lacey20@stewart-thornton.com', 'Coach team third evening energy.', FALSE),
+('jeffreyhernandez', 'Michael Marquez', '&U^1jHR$WNQ4WQ7g', 'cassandragarrison@peters.com', 'Produce consumer project ten not model.', FALSE),
+('sduke', 'Danny Miller', 'E5$$ovktMlEQ@tVP', 'ssmith@hotmail.com', 'Whether one land in movie able.', TRUE),
+('robertbarron', 'Jeffrey Castro', 'J%*5oU6i#D5FlTgT', 'derekwilliams@hotmail.com', 'Stage offer some upon agency call.', FALSE),
+('qcox', 'Dawn Perez', 'cEM5g5Ef(CaeN$TW', 'clintonriley@manning.com', 'Mind she purpose tax magazine six.', FALSE),
+('baileyjulie', 'Shannon Dillon', '$joK11%pd)$0mKa0', 'martinezrobert@yahoo.com', 'Peace hear break relate yeah.', FALSE),
+('davidherrera', 'Emily Cole', '++mdYJIjqj4zJcv5', 'keithrios@hotmail.com', 'Focus teacher system wait professor station.', FALSE),
+('lisa13', 'Kevin Burns', 'Byo&4kYp$$0KG)$a', 'oliviarollins@pena.net', 'Race paper during practice.', TRUE),
+('idavis', 'Laura Walker', '#$cuK1Iy1GnIPp8x', 'mellis@reed.com', 'Card dog occur professor choice expect.', TRUE),
+('chadmorris', 'Tara Hardy', '!py@O4O^uQs$2_y5', 'vli@hotmail.com', 'Century position history old year situation participant close.', TRUE),
+('peterskrista', 'Monica Smith', 'vg$3XvLkmjTNL&i9', 'ruth62@gmail.com', 'Bar before energy serious leg would.', TRUE),
+('michaelanderson', 'Tracey Snyder DDS', '2uPNCJTuJZ#&vS&7', 'crichard@parker.com', 'Always else read movement.', FALSE),
+('nbowman', 'Michael Little', 't@fcy@$j)(L3#n5C', 'rebecca48@yahoo.com', 'Trial much think use wind.', FALSE),
+('youngerin', 'Cindy Rodriguez', '2!50nwXewo+gx6Pk', 'johnsonmichael@gmail.com', 'Different organization effect pull could friend brother.', TRUE),
+('eriley', 'Ryan Trevino', '&2#IqUimoj^adXtZ', 'sabrinahernandez@dunn-nelson.info', 'Executive up black same organization what sense.', TRUE),
+('thomaswest', 'Sarah Escobar', '@8D*R_Qy_vXzc+eb', 'igonzalez@horton.com', 'Foreign worker hard investment able.', TRUE),
+('hudsonadam', 'Joshua Sims', '*6L%z%lK%b8HK%Zz', 'carriejames@williams-waters.net', 'Plan religious group analysis rate forward.', FALSE),
+('thomastony', 'Amanda Gregory', 'Tv4!8*A81!OyX^q_', 'swalters@gmail.com', 'What visit girl couple first.', TRUE),
+('lucasdeanna', 'Ashley Garcia', 'dDVk0J3u0&5v3k5g', 'kevinmills@yahoo.com', 'Year great short weight level.', TRUE),
+('sarah02', 'Renee Harris', 'Fkl(4ZtrcX_sZ@Gj', 'richardsimpson@gmail.com', 'Forget modern part decide actually together.', TRUE),
+('kruiz', 'Gregory Colon', '+0XNrVW%Lgfqeah%', 'ian66@yahoo.com', 'Action million its in.', TRUE),
+('francisscott', 'Kimberly Glover', 'ikFUTR2E%Wh7d+ep', 'vmontoya@burns.org', 'Factor operation buy owner course house response.', TRUE),
+('kennethharding', 'Steven Small', '*5YW0Xhv!361&heT', 'monroepamela@taylor.com', 'World in act boy dinner material production.', FALSE),
+('robertweaver', 'Erica Wilson', 'D(jmG2U01^1kwnzC', 'brian17@gmail.com', 'Machine believe kid wall.', FALSE),
+('kathyzamora', 'Cassie Scott', 'hesrmq&Q!F80_ESn', 'millerbrenda@rivera-adams.org', 'Visit read hot term within heavy.', FALSE),
+('austin64', 'Austin Frye', 'w!g!5@R&xjk@ULe+', 'randolphwilliam@martin.info', 'That important wind drive mind any.', TRUE),
+('wcurtis', 'Ashley Larson PhD', '#T2s+c*ojfDMKz7#', 'pbrown@anderson.info', 'Worry mission seat hit.', TRUE),
+('anthonygeorge', 'Robert Benjamin', 'LR0+@YI_GVkH1mAj', 'daniellesmith@gmail.com', 'Positive bed structure might describe page war.', FALSE),
+('brandonmedina', 'Katherine Evans', '^e#3ITJn^%4e6Y(f', 'robertsdavid@gmail.com', 'He less hard small fish key night.', TRUE);
 
 INSERT INTO chats (name, creator)
 VALUES
-('General Chat', 43),
-('Web Dev Talk', 44),
-('DC Heroes Hangout', 41),
-('Journalism Circle', 45),
-('Amazon Island Group', 46);
+('General Chat', 1),
+('Web Dev Talk', 2),
+('DC Heroes Hangout', 3),
+('Journalism Circle', 4),
+('Amazon Island Group', 5);
 
 INSERT INTO chat_administrators (chat_id, user_id)
 VALUES
 (1, 39),
-(2, 38),
+(2, 6),
 (3, 39),
-(4, 38),
+(4, 6),
 (5, 39);
 
 INSERT INTO chat_members (chat_id, user_id)
 VALUES
--- Chat 1 (Members: 38, 39, 41, 42, 43, 44, 45)
+-- Chat 1 (Members: 6, 39, 3, 42, 1, 2, 4)
 (1, 39),
-(1, 38),
-(1, 41),
+(1, 6),
+(1, 3),
 (1, 42),
-(1, 43),
-(1, 44),
-(1, 45),
+(1, 1),
+(1, 2),
+(1, 4),
 
--- Chat 2 (Members: 38, 41, 46)
-(2, 38),
-(2, 41),
-(2, 46),
+-- Chat 2 (Members: 6, 3, 5)
+(2, 6),
+(2, 3),
+(2, 5),
 
--- Chat 3 (Members: 39, 43, 44, 45, 46)
+-- Chat 3 (Members: 39, 1, 2, 4, 5)
 (3, 39),
-(3, 43),
-(3, 44),
-(3, 45),
-(3, 46),
+(3, 1),
+(3, 2),
+(3, 4),
+(3, 5),
 
--- Chat 4 (Members: 38, 42, 44)
-(4, 38),
+-- Chat 4 (Members: 6, 42, 2)
+(4, 6),
 (4, 42),
-(4, 44),
+(4, 2),
 
--- Chat 5 (Members: 39, 41, 42, 43, 46)
+-- Chat 5 (Members: 39, 3, 42, 1, 5)
 (5, 39),
-(5, 41),
+(5, 3),
 (5, 42),
-(5, 43),
-(5, 46);
+(5, 1),
+(5, 5);
 
 INSERT INTO chat_messages (chat_id, sender_id, date_sent, message)
 VALUES
--- Chat 1 (Members: 38, 39, 41, 42, 43, 44, 45)
+-- Chat 1 (Members: 6, 39, 3, 42, 1, 2, 4)
 (1, 39, '2024-12-01 09:15:00', 'Good morning everyone! Kicking off the week strong.'),
-(1, 43, '2024-12-01 09:17:00', 'Morning! Got some code I want to share later.'),
-(1, 41, '2024-12-01 10:20:00', 'Same here, just fixed a CSS bug.'),
-(1, 38, '2024-12-01 11:05:00', 'Sweet, drop them in when you’re ready.'),
+(1, 1, '2024-12-01 09:17:00', 'Morning! Got some code I want to share later.'),
+(1, 3, '2024-12-01 10:20:00', 'Same here, just fixed a CSS bug.'),
+(1, 6, '2024-12-01 11:05:00', 'Sweet, drop them in when you’re ready.'),
 
--- Chat 2 (Members: 38, 41, 46)
-(2, 38, '2024-11-28 08:40:00', 'Here’s the article I mentioned.'),
-(2, 41, '2024-11-28 09:02:00', 'Thanks! I’ll give it a read today.'),
-(2, 46, '2024-11-28 10:15:00', 'Nice find. Loved the second half.'),
+-- Chat 2 (Members: 6, 3, 5)
+(2, 6, '2024-11-28 08:40:00', 'Here’s the article I mentioned.'),
+(2, 3, '2024-11-28 09:02:00', 'Thanks! I’ll give it a read today.'),
+(2, 5, '2024-11-28 10:15:00', 'Nice find. Loved the second half.'),
 
--- Chat 3 (Members: 39, 43, 44, 45, 46)
+-- Chat 3 (Members: 39, 1, 2, 4, 5)
 (3, 39, '2024-12-02 14:00:00', 'Anyone deploying this week?'),
-(3, 43, '2024-12-02 14:20:00', 'Trying to. Still debugging a merge conflict.'),
-(3, 45, '2024-12-02 15:05:00', 'I can help if you want to pair up.'),
-(3, 44, '2024-12-02 16:10:00', 'Jumping in after my meeting.'),
+(3, 1, '2024-12-02 14:20:00', 'Trying to. Still debugging a merge conflict.'),
+(3, 4, '2024-12-02 15:05:00', 'I can help if you want to pair up.'),
+(3, 2, '2024-12-02 16:10:00', 'Jumping in after my meeting.'),
 
--- Chat 4 (Members: 38, 42, 44)
-(4, 38, '2024-11-29 12:00:00', 'Anyone tried the new design system?'),
+-- Chat 4 (Members: 6, 42, 2)
+(4, 6, '2024-11-29 12:00:00', 'Anyone tried the new design system?'),
 (4, 42, '2024-11-29 12:20:00', 'Yes! It’s much more accessible.'),
-(4, 44, '2024-11-29 13:30:00', 'Agreed, especially the form inputs.'),
+(4, 2, '2024-11-29 13:30:00', 'Agreed, especially the form inputs.'),
 
--- Chat 5 (Members: 39, 41, 42, 43, 46)
+-- Chat 5 (Members: 39, 3, 42, 1, 5)
 (5, 39, '2024-12-03 08:00:00', 'Let’s plan a meetup next month.'),
-(5, 46, '2024-12-03 08:35:00', 'Sounds good. Prefer weekends.'),
-(5, 41, '2024-12-03 09:10:00', 'Count me in. NYC again?'),
-(5, 43, '2024-12-03 10:15:00', 'I’ll check venues and report back.');
+(5, 5, '2024-12-03 08:35:00', 'Sounds good. Prefer weekends.'),
+(5, 3, '2024-12-03 09:10:00', 'Count me in. NYC again?'),
+(5, 1, '2024-12-03 10:15:00', 'I’ll check venues and report back.');
 
 INSERT INTO read_messages (chat_id, user_id, new_message)
 VALUES 
-(1, 43, TRUE),
-(1, 44, TRUE),
-(1, 41, TRUE),
-(1, 45, TRUE),
+(1, 1, TRUE),
+(1, 2, TRUE),
+(1, 3, TRUE),
+(1, 4, TRUE),
 (1, 42, TRUE),
 (1, 39, TRUE),
-(1, 38, TRUE),
+(1, 6, TRUE),
 
-(2, 41, TRUE),
-(2, 46, TRUE),
-(2, 38, TRUE),
+(2, 3, TRUE),
+(2, 5, TRUE),
+(2, 6, TRUE),
 
-(3, 43, TRUE),
-(3, 45, TRUE),
-(3, 44, TRUE),
-(3, 46, TRUE),
+(3, 1, TRUE),
+(3, 4, TRUE),
+(3, 2, TRUE),
+(3, 5, TRUE),
 (3, 39, TRUE),
 
-(4, 44, TRUE),
+(4, 2, TRUE),
 (4, 42, TRUE),
-(4, 38, TRUE),
+(4, 6, TRUE),
 
-(5, 41, TRUE),
+(5, 3, TRUE),
 (5, 42, TRUE),
-(5, 43, TRUE),
-(5, 46, TRUE),
+(5, 1, TRUE),
+(5, 5, TRUE),
 (5, 39, TRUE);
 
 // database info 
