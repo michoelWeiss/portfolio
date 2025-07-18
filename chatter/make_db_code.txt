@@ -95,6 +95,9 @@ CREATE TABLE global_stats (
   total_chats INT NOT NULL DEFAULT 0
 );
 
+ALTER TABLE chats
+ADD COLUMN details TEXT;
+
 ADDED DATA
 INSERT INTO users (username, display_name, password, email, security_question, email_verified)
 VALUES

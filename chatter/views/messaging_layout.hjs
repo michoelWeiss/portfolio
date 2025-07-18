@@ -27,6 +27,7 @@
     </main>
 
 <div id="toast" class="toast" style="display: none;"></div>
+<audio id="messageSound" src="/Audio/new-message-31-183617.mp3" preload="auto"></audio>
  
 
     <script src="/javascripts/bootstrap.bundle.min.js"></script>

@@ -1,92 +1,148 @@
-<div class="section-wrapper">
-  <div class="section-header">
-    <div class="section-header-left">
-      <h3>My Chats</h3>
+<div id="main_Content">
+  <div class="section-wrapper">
+    <div class="section-header">
+      <div class="section-header-left">
+        <h3>My Chats</h3>
+      </div>
+    </div>
+    <div id="chat_list"> </div>
+  </div>
+
+
+
+
+
+  <div id="join_chats_page">
+    <div class="section-header">
+      <div class="section-header-left">
+        <h3>Join Chats</h3>
+        <p>Click on a chat to send a join request to the admin</p>
+      </div>
+      <button id="create-chat-button">Create Chat</button>
+    </div>
+
+    <form>
+      <button id="join_chats_refresh_button" type="button">Refresh</button>
+      <input id="join_chats_input" type="text">
+      <button id="join_chats_submit_button" type="button">Search</button>
+    </form>
+
+    <div id="join_chats_main_row" class="carousel slide">
+      <div class="join-chats-carousel-row">
+        <button id="join_chats_LastButt" class="carousel-control-prev" type="button"
+          data-bs-target="#join_chats_main_row" data-bs-slide="prev">
+          <span class="visually-hidden">Previous</span>
+          &larr;
+        </button>
+
+        <div id="join_chats_wrapper" class="carousel-inner">
+
+          <div class="carousel-item join_chats_Container active showing">
+            <div class="join-chats-inner-row">
+              <!-- Your chat cards go here -->
+            </div>
+          </div>
+          <div class="carousel-item join_chats_Container next">
+            <div class="join-chats-inner-row">
+              <!-- Your chat cards go here -->
+            </div>
+          </div>
+          <div class="carousel-item join_chats_Container prev">
+            <div class="join-chats-inner-row">
+              <!-- Your chat cards go here -->
+            </div>
+          </div>
+
+        </div>
+
+        <button id="join_chats_NextButt" class="carousel-control-next" type="button"
+          data-bs-target="#join_chats_main_row" data-bs-slide="next">
+          <span class="visually-hidden">Next</span>
+          &rarr;
+        </button>
+      </div>
     </div>
   </div>
-  <div id="chat_list"> </div>
+
+  <div class="section-wrapper user-wrapper">
+    <div class="section-header">
+      <div class="section-header-left">
+        <h3>Users</h3>
+        <p>Click on a user to start messaging</p>
+      </div>
+    </div>
+    <div id="user-list-wrapper">
+      <form>
+        <button id="user_list_refresh_button" type="button">Refresh</button>
+        <input id="user_list_input" type="text">
+        <button id="user_list_submit_button" type="button">Search</button>
+      </form>
+      <div id="user_list" class="user-list-container">
+        <!-- User cards will be inserted here -->
+      </div>
+    </div>
+
+  </div>
 </div>
+
+
 
 <div id="message_Page">
   <button class="close_btn">&times;</button>
+  <button id="chat_Info_btn">Chat Info</button>
   <div id="chat_Info"></div>
   <div id="message_Container"></div>
   <form>
-    <input id="message_input" type="text">
-    <button id="submit_button" type="button">Submit</button>
+    <input id="message_input" type="text" placeholder="Type a message...">
+    <button id="submit_button" type="button">Send</button>
   </form>
 </div>
 
-
-
-<div id="join_chats_page">
-  <div class="section-header">
-    <div class="section-header-left">
-      <h3>Join Chats</h3>
-      <p>Click on a chat to send a join request to the admin</p>
-    </div>
-    <button id="create-chat-button">Create Chat</button>
+<div id="chat_details">
+  <div class="chat-header-bar">
+    <button id="chat_details_close_btn">
+      <img src="/images/goBackArrowicon.png" alt="Go back">
+    </button>
   </div>
 
-  <form>
-    <button id="join_chats_refresh_button" type="button">Refresh</button>
-    <input id="join_chats_input" type="text">
-    <button id="join_chats_submit_button" type="button">Search</button>
-  </form>
+  <div id="chat_details_InfoBox">
+    <!-- Chat Info -->
+    <div class="chat-top-section">
+      <h2 class="chat-title"></h2>
+      <p class="chat-description"></p>
+      <p class="chat-created">Created on: <span></span></p>
+      <p class="chat-admin">Admin: <span></span></p>
+      <p class="user-status">Your Status: <span></span></p>
+    </div>
 
-  <div id="join_chats_main_row" class="carousel slide">
-    <div class="join-chats-carousel-row">
-      <button id="join_chats_LastButt" class="carousel-control-prev" type="button" data-bs-target="#join_chats_main_row"
-        data-bs-slide="prev">
-        <span class="visually-hidden">Previous</span>
-        &larr;
-      </button>
-
-      <div id="join_chats_wrapper" class="carousel-inner">
-
-        <div class="carousel-item join_chats_Container active showing">
-          <div class="join-chats-inner-row">
-            <!-- Your chat cards go here -->
+    <!-- Accordion -->
+    <div class="accordion accordion-flush" id="accordionFlushExample">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="flush-headingOne">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false">
+            Admin Controls
+          </button>
+        </h2>
+        <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+          <div class="accordion-body">
+            <button id="EditName">Edit Group Name</button>
+            <button id="EditDescription">Edit description</button>
+            <button id="ChangeAdmin">Change Admin</button>
+            <button id="RemoveMember">Remove Members</button>
           </div>
         </div>
-        <div class="carousel-item join_chats_Container next">
-          <div class="join-chats-inner-row">
-            <!-- Your chat cards go here -->
-          </div>
-        </div>
-        <div class="carousel-item join_chats_Container prev">
-          <div class="join-chats-inner-row">
-            <!-- Your chat cards go here -->
-          </div>
-        </div>
-
       </div>
+    </div>
 
-      <button id="join_chats_NextButt" class="carousel-control-next" type="button" data-bs-target="#join_chats_main_row"
-        data-bs-slide="next">
-        <span class="visually-hidden">Next</span>
-        &rarr;
-      </button>
+    <!-- Members -->
+    <div class="members-section">
+      <h3>Members</h3>
+      <div class="members-list"></div>
+    </div>
+
+    <!-- Default Actions -->
+    <div class="default-actions">
+      <button class="leave-btn">Leave Chat</button>
     </div>
   </div>
-</div>
-
-<div class="section-wrapper user-wrapper">
-  <div class="section-header">
-    <div class="section-header-left">
-      <h3>Users</h3>
-      <p>Click on a user to start messaging</p>
-    </div>
-  </div>
-  <div id="user-list-wrapper">
-    <form>
-      <button id="user_list_refresh_button" type="button">Refresh</button>
-      <input id="user_list_input" type="text">
-      <button id="user_list_submit_button" type="button">Search</button>
-    </form>
-    <div id="user_list" class="user-list-container">
-      <!-- User cards will be inserted here -->
-    </div>
-  </div>
-
 </div>
